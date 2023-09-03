@@ -1,9 +1,11 @@
 package main
 
 import (
-	"blog-api/test"
+	"blog-api/dbapi"
+	"blog-api/mysql"
 )
 
 func main() {
-	test.Testapi()
+	mysql.InitMySQL()
+	dbapi.DeleteOne()
 }
