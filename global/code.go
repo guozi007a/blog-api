@@ -9,3 +9,6 @@ var CodeLackRequired = "1"
 
 // 解码失败
 var CodeUnmarshalFailed = "2"
+
+// 查询失败
+var CodeQueryFailed = "3"

@@ -66,8 +66,6 @@ func PublishLogs(c *gin.Context) {
 	})
 }
 
-// [{"id": "c", "key": "c", "content": "这是第3条日志哦~"}]
-
 // 删除某个日期下的全部日志
 func DeleteLogs(c *gin.Context) {
 
@@ -78,9 +76,44 @@ func ClearAllLogs(c *gin.Context) {
 
 }
 
-// 查询某个日期下的日志
-func FindDayLogs(c *gin.Context) {
+type DateLog struct {
+	ID      string `json:"id"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
+	// LogID   string `json:"log_id"` // 返回给前端时，不需要该字段了，就不写了
+}
 
+// 查询某个日期下的日志
+func FindDateLogs(c *gin.Context) {
+	db := global.GlobalDB
+
+	date := c.Query("date")
+
+	if date == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数：date",
+		})
+		return
+	}
+
+	var logs []DateLog
+
+	result := db.Table("devlogs").Where("log_id = ?", date).Select("id", "key", "content").Find(&logs)
+
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeQueryFailed,
+			"message": "查询失败",
+		})
+		panic(result.Error)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    logs,
+	})
 }
 
 // 查询所有日志
