@@ -1,4 +1,4 @@
-package mysql
+package dbserver
 
 import (
 	"database/sql"
@@ -6,6 +6,7 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 
+	"blog-api/db_server/tables"
 	"blog-api/global"
 )
 
@@ -16,11 +17,19 @@ func InitMySQL() {
 	}
 	mysqlDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: sqlDB,
-	}), &gorm.Config{})
+	}), &gorm.Config{
+		// 禁止自动创建外键约束
+		DisableForeignKeyConstraintWhenMigrating: true,
+	})
 
 	if err != nil {
 		panic(err)
 	}
+
+	mysqlDB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
+		&tables.DevLogs{},
+		&tables.DateLogs{},
+	)
 
 	global.GlobalDB = mysqlDB
 }
