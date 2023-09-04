@@ -118,5 +118,6 @@ func FindDateLogs(c *gin.Context) {
 
 // 查询所有日志
 func FindAllLogs(c *gin.Context) {
+	// db := global.GlobalDB
 
 }
