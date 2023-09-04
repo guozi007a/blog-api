@@ -1,7 +1,8 @@
 package tables
 
 type DateLogs struct {
-	Date string `json:"date" gorm:"primaryKey;comment:日期如2023-09-04"`
+	ID   uint   `json:"id" gorm:"primaryKey"`
+	Date string `json:"date" gorm:"comment:日期如2023-09-04"`
 }
 
 func (DateLogs) TableName() string {
