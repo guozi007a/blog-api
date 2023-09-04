@@ -87,18 +87,3 @@ func FindDayLogs(c *gin.Context) {
 func FindAllLogs(c *gin.Context) {
 
 }
-
-// 获取日志列表
-func LogsList(c *gin.Context) {
-	data := map[string]interface{}{
-		"name":   "dilireba",
-		"age":    18,
-		"gender": "女",
-	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    0,
-		"message": "success",
-		"data":    data,
-	})
-}
