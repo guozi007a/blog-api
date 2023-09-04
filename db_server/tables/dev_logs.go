@@ -1,12 +1,12 @@
 package tables
 
 type DateLogs struct {
-	ID   uint   `json:"id" gorm:"primaryKey"`
-	Date string `json:"date" gorm:"comment:日期如2023-09-04"`
+	// 这里直接用date做主键，利用主键的唯一性，避免日期重复
+	Date string `json:"date" gorm:"primaryKey;comment:日期如2023-09-04"`
 }
 
 func (DateLogs) TableName() string {
-	return "dateLogs"
+	return "datelogs"
 }
 
 type DevLogs struct {
@@ -18,5 +18,5 @@ type DevLogs struct {
 }
 
 func (DevLogs) TableName() string {
-	return "devLogs"
+	return "devlogs"
 }

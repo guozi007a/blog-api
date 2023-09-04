@@ -13,14 +13,17 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-var db = global.GlobalDB
+type Log struct {
+	ID      string `json:"id"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
+}
 
 // 发布日志
 func PublishLogs(c *gin.Context) {
-	// date := c.PostForm("date")
-	logs := c.PostForm("logs")
+	db := global.GlobalDB // 这一句初始化，一定要放置接口函数内，不然就panic
 
-	fmt.Println(logs)
+	logs := c.PostForm("logs")
 
 	if logs == "" {
 		c.JSON(http.StatusOK, gin.H{
@@ -30,7 +33,7 @@ func PublishLogs(c *gin.Context) {
 		return
 	}
 
-	var logList []tables.DevLogs
+	var logList []Log
 
 	err := json.Unmarshal([]byte(logs), &logList)
 	if err != nil {
@@ -41,18 +44,19 @@ func PublishLogs(c *gin.Context) {
 		return
 	}
 
-	fmt.Printf("解码后：%+v", logList)
-
-	// if date == "" { // 没有date，说明是发布日志，需要在后端生成一个日期，如2023-09-04
 	publishDate := time.Now().Local().Format("2006-01-02")
 
 	for _, log := range logList {
-		db.Clauses(clause.OnConflict{DoNothing: true}).Create(&tables.DevLogs{
+		result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&tables.DevLogs{
 			ID:       log.ID,
 			Key:      log.Key,
 			Content:  log.Content,
+			LogID:    publishDate,
 			DateLogs: tables.DateLogs{Date: publishDate},
 		})
+		if result.Error != nil {
+			panic(result.Error)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -60,9 +64,9 @@ func PublishLogs(c *gin.Context) {
 		"message": "success",
 		"data":    true,
 	})
-	// }
-
 }
+
+// [{"id": "c", "key": "c", "content": "这是第3条日志哦~"}]
 
 // 删除某个日期下的全部日志
 func DeleteLogs(c *gin.Context) {
