@@ -18,3 +18,6 @@ var CodeFormatError = "4"
 
 // 获取参数失败
 var CodeGetParamsFailed = "5"
+
+// 数据为空，如"", [], {}, nil等
+var CodeEmptyValue = "6"
