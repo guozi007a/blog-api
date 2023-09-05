@@ -13,6 +13,10 @@ import (
 	"gorm.io/gorm/clause"
 )
 
+type Day struct {
+	Date string `json:"date"`
+}
+
 type Log struct {
 	ID      string `json:"id"`
 	Key     string `json:"key"`
@@ -78,13 +82,6 @@ func ClearAllLogs(c *gin.Context) {
 
 }
 
-type DateLog struct {
-	ID      string `json:"id"`
-	Key     string `json:"key"`
-	Content string `json:"content"`
-	// LogID   string `json:"log_id"` // 返回给前端时，不需要该字段了，就不写了
-}
-
 // 查询某个日期下的日志
 func FindDateLogs(c *gin.Context) {
 	db := global.GlobalDB
@@ -108,7 +105,7 @@ func FindDateLogs(c *gin.Context) {
 		return
 	}
 
-	var logs []DateLog
+	var logs []Log
 
 	result := db.Table("devlogs").Where("log_id = ?", date).Select("id", "key", "content").Find(&logs)
 
@@ -127,16 +124,6 @@ func FindDateLogs(c *gin.Context) {
 	})
 }
 
-type Day struct {
-	Date string `json:"date"`
-}
-
-type Dev struct {
-	ID      string `json:"id"`
-	Key     string `json:"key"`
-	Content string `json:"content"`
-}
-
 // 查询所有日志
 func FindAllLogs(c *gin.Context) {
 	db := global.GlobalDB
@@ -153,7 +140,7 @@ func FindAllLogs(c *gin.Context) {
 		return
 	}
 
-	var devs []Dev
+	var devs []Log
 	var logs []interface{} // 定义一个元素是任意类型的空切片。因为需要把不同类型的数据拼接在一起
 
 	for _, day := range days {
