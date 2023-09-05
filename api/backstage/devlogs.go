@@ -72,9 +72,6 @@ func PublishLogs(c *gin.Context) {
 	})
 }
 
-// [{"id": "a", "key": "a", "content": "发布了1条数据"},{"id": "b", "key": "b", "content": "发布了2条数据"}]
-// [{"id": "c", "key": "c", "content": "更新了1条数据"},{"id": "d", "key": "d", "content": "更新了2条数据"}]
-
 // 更新某个日期的日志
 func UpdateDateLogs(c *gin.Context) {
 	db := global.GlobalDB
