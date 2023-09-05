@@ -12,3 +12,6 @@ var CodeUnmarshalFailed = "2"
 
 // 查询失败
 var CodeQueryFailed = "3"
+
+// 格式错误
+var CodeFormatError = "4"

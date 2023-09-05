@@ -66,6 +66,8 @@ func PublishLogs(c *gin.Context) {
 	})
 }
 
+// [{"id": "a", "key": "a", "content": "这是第1条日志哦~"}]
+
 // 删除某个日期下的全部日志
 func DeleteLogs(c *gin.Context) {
 
@@ -93,6 +95,15 @@ func FindDateLogs(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
 			"message": "缺少必要参数：date",
+		})
+		return
+	}
+
+	_, err := time.Parse("2016-01-02", date)
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeFormatError,
+			"message": "参数date格式错误",
 		})
 		return
 	}
