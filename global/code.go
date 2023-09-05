@@ -15,3 +15,6 @@ var CodeQueryFailed = "3"
 
 // 格式错误
 var CodeFormatError = "4"
+
+// 获取参数失败
+var CodeGetParamsFailed = "5"

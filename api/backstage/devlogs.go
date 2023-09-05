@@ -39,6 +39,7 @@ func PublishLogs(c *gin.Context) {
 
 	var logList []Log
 
+	// 将logs解码为[]{}形式的数据
 	err := json.Unmarshal([]byte(logs), &logList)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -51,6 +52,7 @@ func PublishLogs(c *gin.Context) {
 	publishDate := time.Now().Local().Format("2006-01-02")
 
 	for _, log := range logList {
+		// Cloauses用于说明在创建时对冲突的处理方式，这里是对冲突不做任何反应
 		result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&tables.DevLogs{
 			ID:       log.ID,
 			Key:      log.Key,
@@ -70,11 +72,100 @@ func PublishLogs(c *gin.Context) {
 	})
 }
 
-// [{"id": "a", "key": "a", "content": "这是第1条日志哦~"}]
+// [{"id": "a", "key": "a", "content": "发布了1条数据"},{"id": "b", "key": "b", "content": "发布了2条数据"}]
+// [{"id": "c", "key": "c", "content": "更新了1条数据"},{"id": "d", "key": "d", "content": "更新了2条数据"}]
+
+// 更新某个日期的日志
+func UpdateDateLogs(c *gin.Context) {
+	db := global.GlobalDB
+
+	date := c.PostForm("date")
+	logs := c.PostForm("logs")
+
+	if date == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数：date",
+		})
+		return
+	}
+
+	_, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeFormatError,
+			"message": "参数date格式错误",
+		})
+		return
+	}
+
+	var logList []Log
+
+	err1 := json.Unmarshal([]byte(logs), &logList)
+	if err1 != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeUnmarshalFailed,
+			"message": fmt.Sprintf("数据解码失败：%s", err1),
+		})
+		return
+	}
+
+	// 先删除
+	db.Where("date = ?", date).Unscoped().Delete(&tables.DateLogs{})
+	// 再重新创建
+	for _, log := range logList {
+		// Cloauses用于说明在创建时对冲突的处理方式，这里是对冲突不做任何反应
+		result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&tables.DevLogs{
+			ID:       log.ID,
+			Key:      log.Key,
+			Content:  log.Content,
+			LogID:    date,
+			DateLogs: tables.DateLogs{Date: date},
+		})
+		if result.Error != nil {
+			panic(result.Error)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
+}
 
 // 删除某个日期下的全部日志
-func DeleteLogs(c *gin.Context) {
+func DeleteDateLogs(c *gin.Context) {
+	db := global.GlobalDB
 
+	date := c.Query("date")
+
+	fmt.Printf("date的值：%+v", date)
+
+	if date == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数：date",
+		})
+		return
+	}
+
+	_, err := time.Parse("2006-01-02", date)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeFormatError,
+			"message": "参数date格式错误",
+		})
+		return
+	}
+
+	db.Where("date = ?", date).Unscoped().Delete(&tables.DateLogs{})
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
 }
 
 // 清空所有日志
@@ -96,8 +187,8 @@ func FindDateLogs(c *gin.Context) {
 		return
 	}
 
-	_, err := time.Parse("2016-01-02", date)
-	if err == nil {
+	_, err := time.Parse("2006-01-02", date)
+	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,
 			"message": "参数date格式错误",

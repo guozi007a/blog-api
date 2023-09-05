@@ -17,10 +17,7 @@ func InitMySQL() {
 	}
 	mysqlDB, err := gorm.Open(mysql.New(mysql.Config{
 		Conn: sqlDB,
-	}), &gorm.Config{
-		// 禁止自动创建外键约束
-		DisableForeignKeyConstraintWhenMigrating: true,
-	})
+	}), &gorm.Config{})
 
 	if err != nil {
 		panic(err)
