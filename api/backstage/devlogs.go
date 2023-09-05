@@ -154,7 +154,7 @@ func FindAllLogs(c *gin.Context) {
 	}
 
 	var devs []Dev
-	var logs []map[string]interface{}
+	var logs []interface{} // 定义一个元素是任意类型的空切片。因为需要把不同类型的数据拼接在一起
 
 	for _, day := range days {
 		result := db.Table("devlogs").Where("log_id = ?", day.Date).Find(&devs)
@@ -166,17 +166,10 @@ func FindAllLogs(c *gin.Context) {
 			return
 		}
 
-		// 这里需要先将day数据类型转换成map[string]interface{}类型，才能进行同类型拼接
-		dayMap := make(map[string]interface{}, 1)
-		dayMap["Date"] = day.Date
-		logs = append(logs, dayMap)
+		logs = append(logs, day)
 
 		for _, dev := range devs {
-			devMap := make(map[string]interface{}, 3)
-			devMap["ID"] = dev.ID
-			devMap["Key"] = dev.Key
-			devMap["Content"] = dev.Content
-			logs = append(logs, devMap)
+			logs = append(logs, dev)
 		}
 	}
 
