@@ -140,8 +140,6 @@ func DeleteDateLogs(c *gin.Context) {
 
 	date := c.Query("date")
 
-	fmt.Printf("date的值：%+v", date)
-
 	if date == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
@@ -170,7 +168,15 @@ func DeleteDateLogs(c *gin.Context) {
 
 // 清空所有日志
 func ClearAllLogs(c *gin.Context) {
+	db := global.GlobalDB
 
+	db.Where("1 = 1").Unscoped().Delete(&tables.DateLogs{})
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
 }
 
 // 查询某个日期下的日志
