@@ -127,8 +127,62 @@ func FindDateLogs(c *gin.Context) {
 	})
 }
 
+type Day struct {
+	Date string `json:"date"`
+}
+
+type Dev struct {
+	ID      string `json:"id"`
+	Key     string `json:"key"`
+	Content string `json:"content"`
+}
+
 // 查询所有日志
 func FindAllLogs(c *gin.Context) {
-	// db := global.GlobalDB
+	db := global.GlobalDB
 
+	var days []Day
+
+	// 这里使用降序查找，即最近的日志放在上面
+	result := db.Table("datelogs").Order("date desc").Find(&days)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeQueryFailed,
+			"message": "查询失败",
+		})
+		return
+	}
+
+	var devs []Dev
+	var logs []map[string]interface{}
+
+	for _, day := range days {
+		result := db.Table("devlogs").Where("log_id = ?", day.Date).Find(&devs)
+		if result.Error != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeQueryFailed,
+				"message": "查询失败",
+			})
+			return
+		}
+
+		// 这里需要先将day数据类型转换成map[string]interface{}类型，才能进行同类型拼接
+		dayMap := make(map[string]interface{}, 1)
+		dayMap["Date"] = day.Date
+		logs = append(logs, dayMap)
+
+		for _, dev := range devs {
+			devMap := make(map[string]interface{}, 3)
+			devMap["ID"] = dev.ID
+			devMap["Key"] = dev.Key
+			devMap["Content"] = dev.Content
+			logs = append(logs, devMap)
+		}
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    "0",
+		"message": "success",
+		"data":    logs,
+	})
 }
