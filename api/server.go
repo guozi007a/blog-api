@@ -16,8 +16,6 @@ func Server() {
 		MaxAge:           20,
 	}))
 
-	// global.Router = r
-
 	groupRouter(r)
 
 	r.Run(server)
