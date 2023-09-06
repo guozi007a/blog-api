@@ -1,8 +1,6 @@
 package backstage
 
 import (
-	"encoding/json"
-	"fmt"
 	"net/http"
 
 	"blog-api/db_server/tables"
@@ -23,13 +21,24 @@ type Log struct {
 	Content string `json:"content"`
 }
 
+type PubLogParams struct {
+	Logs []Log `json:"logs"`
+}
+
+type UpdateLogParams struct {
+	Date string `json:"date"`
+	Logs []Log  `json:"logs"`
+}
+
 // 发布日志
 func PublishLogs(c *gin.Context) {
 	db := global.GlobalDB // 这一句初始化，一定要放置接口函数内，不然就panic
 
-	logs := c.PostForm("logs")
+	var params PubLogParams
 
-	if logs == "" {
+	err1 := c.ShouldBind(&params)
+
+	if err1 != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
 			"message": "缺少必要参数：日志列表",
@@ -37,17 +46,7 @@ func PublishLogs(c *gin.Context) {
 		return
 	}
 
-	var logList []Log
-
-	// 将logs解码为[]{}形式的数据
-	err := json.Unmarshal([]byte(logs), &logList)
-	if err != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeUnmarshalFailed,
-			"message": fmt.Sprintf("数据解码失败：%s", err),
-		})
-		return
-	}
+	logList := params.Logs
 
 	publishDate := time.Now().Local().Format("2006-01-02")
 
@@ -76,8 +75,18 @@ func PublishLogs(c *gin.Context) {
 func UpdateDateLogs(c *gin.Context) {
 	db := global.GlobalDB
 
-	date := c.PostForm("date")
-	logs := c.PostForm("logs")
+	var params UpdateLogParams
+
+	if err := c.ShouldBind(&params); err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeGetParamsFailed,
+			"message": "获取参数失败",
+		})
+		return
+	}
+
+	date := params.Date
+	logs := params.Logs
 
 	if date == "" {
 		c.JSON(http.StatusOK, gin.H{
@@ -87,8 +96,7 @@ func UpdateDateLogs(c *gin.Context) {
 		return
 	}
 
-	_, err := time.Parse("2006-01-02", date)
-	if err != nil {
+	if _, err := time.Parse("2006-01-02", date); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,
 			"message": "参数date格式错误",
@@ -96,21 +104,10 @@ func UpdateDateLogs(c *gin.Context) {
 		return
 	}
 
-	var logList []Log
-
-	err1 := json.Unmarshal([]byte(logs), &logList)
-	if err1 != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeUnmarshalFailed,
-			"message": fmt.Sprintf("数据解码失败：%s", err1),
-		})
-		return
-	}
-
 	// 先删除
 	db.Where("date = ?", date).Unscoped().Delete(&tables.DateLogs{})
 	// 再重新创建
-	for _, log := range logList {
+	for _, log := range logs {
 		// Cloauses用于说明在创建时对冲突的处理方式，这里是对冲突不做任何反应
 		result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&tables.DevLogs{
 			ID:       log.ID,
