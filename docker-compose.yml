@@ -13,3 +13,5 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: 'jL9@xZ2!tQ6*kT1)>D5+nA^|lN4~zF5$'
       MYSQL_DATABASE: vm50
+    volumes:
+      - ./data:/var/lib/mysql
