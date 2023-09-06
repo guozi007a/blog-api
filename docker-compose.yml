@@ -8,11 +8,16 @@ services:
     ports:
       - "4001:4001"
     depends_on:
-      - db
-  db:
+      - mysql
+  mysql:
     image: mysql:8.0.33
+    command: --default-authentication-plugin=mysql_native_password --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+    restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: 'jL9@xZ2!tQ6*kT1)>D5+nA^|lN4~zF5$'
+      MYSQL_ROOT_PASSWORD: '123456'
       MYSQL_DATABASE: vm50
-    volumes:
-      - ./data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+volumes:
+  mysql-data:
+    driver: local
