@@ -21,3 +21,15 @@ var CodeGetParamsFailed = "5"
 
 // 数据为空，如"", [], {}, nil等
 var CodeEmptyValue = "6"
+
+// 创建文件失败
+var CodeCreateFileError = "7"
+
+// 打开文件失败
+var CodeOpenFileError = "8"
+
+// 复制数据失败
+var CodeCopyFileError = "9"
+
+// 存储失败
+var CodeSaveFileError = "10"

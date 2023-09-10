@@ -16,5 +16,7 @@ func groupRouter(r *gin.Engine) {
 		v1.PUT("/updateDateLogs", backstage.UpdateDateLogs)
 		v1.DELETE("/deleteDateLogs", backstage.DeleteDateLogs)
 		v1.DELETE("/clearAllLogs", backstage.ClearAllLogs)
+
+		v1.POST("/uploadDirect", backstage.UploadFileDirect)
 	}
 }
