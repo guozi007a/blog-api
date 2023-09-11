@@ -20,8 +20,10 @@ type UploadFile struct {
 	Type         string `json:"type"`
 }
 
-type PathData struct {
-	Path string `json:"path"`
+type FinishFileData struct {
+	UID      string  `json:"uid"`
+	Path     string  `json:"path"`
+	Progress float32 `json:"progress"`
 }
 
 // 文件直传
@@ -36,6 +38,8 @@ func UploadFileDirect(c *gin.Context) {
 		})
 		return
 	}
+
+	uid := c.PostForm("uid")
 
 	_, err1 := os.Stat(global.StaticPath)
 	if os.IsNotExist(err1) {
@@ -56,8 +60,10 @@ func UploadFileDirect(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",
-		"data": PathData{
-			Path: fmt.Sprintf("http://localhost:4001/%s", outPath),
+		"data": FinishFileData{
+			UID:      uid,
+			Path:     fmt.Sprintf("http://localhost:4001/%s", outPath),
+			Progress: 100,
 		},
 	})
 }
