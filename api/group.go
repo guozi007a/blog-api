@@ -18,5 +18,6 @@ func groupRouter(r *gin.Engine) {
 		v1.DELETE("/clearAllLogs", backstage.ClearAllLogs)
 
 		v1.POST("/uploadDirect", backstage.UploadFileDirect)
+		v1.POST("/preUpload", backstage.PreUpload)
 	}
 }
