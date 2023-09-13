@@ -143,7 +143,6 @@ func PreUpload(c *gin.Context) {
 func UploadChunk(c *gin.Context) {
 	chunk, err := c.FormFile("chunk")
 	currentChunk := c.PostForm("currentChunk")
-	fmt.Println(currentChunk)
 	if err != nil || currentChunk == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
@@ -170,12 +169,15 @@ func UploadChunk(c *gin.Context) {
 	if err != nil {
 		panic(err)
 	}
-	defer chunkReader.Close()
 
 	_, err1 := io.Copy(chunkfile, chunkReader)
 	if err1 != nil {
 		panic(err)
 	}
+	// 这里一定要记得都用Close关闭，不然一直打开状态，在合并切片后，
+	// 也会一直占用进程，无法删除切片文件
+	chunkReader.Close()
+	chunkfile.Close()
 
 	intCurrentChunk, err := strconv.Atoi(currentChunk)
 	if err != nil {
@@ -202,8 +204,9 @@ func MergeChunks(c *gin.Context) {
 
 	// 从切片文件名中解析出切片序号，组成新的文件列表
 	var chunks []ChunkSort
-	for _, entry = range entries {
-		num, err := strconv.Atoi(strings.Split(entry.Name(), "_")[1])
+	for _, entry := range entries {
+		chunkPiece := strings.Split(entry.Name(), "_")[1]
+		num, err := strconv.Atoi(strings.Split(chunkPiece, ".")[0])
 		if err != nil {
 			panic(err)
 		}
@@ -216,7 +219,7 @@ func MergeChunks(c *gin.Context) {
 	})
 
 	// 创建static目录，有就创建，没有就忽略
-	err1 := os.MkdirAll("static")
+	err1 := os.MkdirAll("static", 0755)
 	if err1 != nil {
 		panic(err1)
 	}
@@ -228,19 +231,31 @@ func MergeChunks(c *gin.Context) {
 	defer file.Close()
 
 	// 遍历合并
-	for _, chunk := range chunks {
-		fi, err := os.Open(fmt.Sprintf("temp/%s", chunk.Name()))
+	for _, chunkItem := range chunks {
+		fi, err := os.Open(fmt.Sprintf("temp/%s", chunkItem.Name))
 		if err != nil {
 			panic(err)
 		}
-		defer fi.Close()
 
 		_, err2 := io.Copy(file, fi)
 		if err2 != nil {
 			panic(err2)
 		}
+		fi.Close()
 
-		os.Remove(fmt.Sprintf("temp/%s", chunk.Name()))
+		err1 := os.Remove(fmt.Sprintf("temp/%s", chunkItem.Name))
+		if err1 != nil {
+			panic(err1)
+		}
 	}
 
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data": FinishFileData{
+			UID:      preFile.UID,
+			Progress: 100,
+			Path:     fmt.Sprintf("http://localhost:4001/static/%s", preFile.Name),
+		},
+	})
 }
