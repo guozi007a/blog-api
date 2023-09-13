@@ -19,5 +19,6 @@ func groupRouter(r *gin.Engine) {
 
 		v1.POST("/uploadDirect", backstage.UploadFileDirect)
 		v1.POST("/preUpload", backstage.PreUpload)
+		v1.POST("/chunkUpload", backstage.UploadChunk)
 	}
 }
