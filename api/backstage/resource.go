@@ -1,8 +1,10 @@
 package backstage
 
 import (
+	"blog-api/db_server/tables"
 	"blog-api/global"
 	"net/http"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	// "gorm.io/gorm/clause"
@@ -22,11 +24,12 @@ type FinishFileData struct {
 }
 
 type PreFile struct {
-	UID  string `json:"uid"`
-	Size int64  `json:"size"` // 这里的size要设置为int64类型，因为file.Size就是int64类型的，省去类型转换
-	Name string `json:"name"`
-	Type string `json:"type"` // 文件的mime类型，例如"image/png"
-	Sort int    `json:"sort"` // 文件已经完成的上传片段数量
+	UID      string `json:"uid"`
+	Size     int64  `json:"size"` // 这里的size要设置为int64类型，因为file.Size就是int64类型的，省去类型转换
+	Name     string `json:"name"`
+	Type     string `json:"type"`     // 文件的mime类型，例如"image/png"
+	Sort     int    `json:"sort"`     // 文件已经完成的上传片段数量
+	Describe string `json:"describe"` // 对预传文件的文字描述
 }
 
 type ChunkRes struct {
@@ -63,11 +66,12 @@ func getCateByType(fileType string) string {
 
 // 文件直传
 func UploadFileDirect(c *gin.Context) {
-	// db := global.GlobalDB
+	db := global.GlobalDB
 
 	file, err := c.FormFile("file")
 	uid := c.PostForm("uid")
 	fileType := c.PostForm("type")
+	describe := c.PostForm("describe")
 	if err != nil || uid == "" || fileType == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
@@ -87,6 +91,20 @@ func UploadFileDirect(c *gin.Context) {
 		return
 	}
 
+	var sourceInfo = tables.SourceInfo{
+		UID:      uid,
+		Name:     file.Filename,
+		Date:     time.Now().UnixMilli(),
+		Category: getCateByType(fileType),
+		Size:     int(file.Size),
+		Describe: describe,
+	}
+
+	result := db.Create(&sourceInfo)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",
@@ -104,6 +122,7 @@ func PreUpload(c *gin.Context) {
 	file, err := c.FormFile("file")
 	uid := c.PostForm("uid")
 	fileType := c.PostForm("type")
+	describe := c.PostForm("describe")
 	if err != nil || uid == "" || fileType == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
@@ -113,11 +132,12 @@ func PreUpload(c *gin.Context) {
 	}
 
 	preFile = PreFile{
-		UID:  uid,
-		Name: file.Filename,
-		Size: file.Size,
-		Type: fileType,
-		Sort: 0,
+		UID:      uid,
+		Name:     file.Filename,
+		Size:     file.Size,
+		Type:     fileType,
+		Sort:     0,
+		Describe: describe,
 	}
 
 	// 移除临时文件目录 防止掺杂其他切片文件
@@ -192,6 +212,7 @@ func UploadChunk(c *gin.Context) {
 
 // 合并切片
 func MergeChunks(c *gin.Context) {
+	db := global.GlobalDB
 	// 获取切片列表
 	entries, err := os.ReadDir(global.TempPath)
 	if err != nil {
@@ -239,6 +260,20 @@ func MergeChunks(c *gin.Context) {
 		if err != nil {
 			panic(err)
 		}
+	}
+
+	var sourceInfo = tables.SourceInfo{
+		UID:      preFile.UID,
+		Name:     preFile.Name,
+		Date:     time.Now().UnixMilli(),
+		Category: getCateByType(preFile.Type),
+		Size:     int(preFile.Size),
+		Describe: preFile.Describe,
+	}
+
+	result := db.Create(&sourceInfo)
+	if result.Error != nil {
+		panic(result.Error)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
