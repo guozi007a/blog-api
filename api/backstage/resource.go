@@ -286,3 +286,22 @@ func MergeChunks(c *gin.Context) {
 		},
 	})
 }
+
+/*
+根据筛选条件，获取单页文件列表
+- 上传时间 -- 默认降序
+- 文件大小 -- 默认升序
+- 每页数量
+*/
+func SelectFileList(c *gin.Context) {
+	// db := global.GlobalDB
+	option := c.Query("option")
+	pageSize := c.GetInt("pageSize")
+	if option == "" || pageSize == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数",
+		})
+		return
+	}
+}
