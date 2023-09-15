@@ -26,7 +26,9 @@ func InitMySQL() {
 	mysqlDB.Set("gorm:table_options", "ENGINE=InnoDB").AutoMigrate(
 		&tables.DevLogs{},
 		&tables.DateLogs{},
+		&tables.SourceInfo{},
 	)
 
 	global.GlobalDB = mysqlDB
+	global.PreDirs()
 }

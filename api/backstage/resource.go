@@ -3,28 +3,17 @@ package backstage
 import (
 	"blog-api/global"
 	"net/http"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	// "gorm.io/gorm/clause"
 	"fmt"
 	"io"
-	"mime"
+
 	"os"
+	"regexp"
 	"sort"
 	"strconv"
-	"strings"
 )
-
-// 存储到db中的文件
-type DBFile struct {
-	ID       int       `json:"id" gorm:"primaryKey"`
-	UID      string    `json:"uid"`
-	Path     string    `json:"path"`
-	Date     time.Time `json:"date"`
-	Category string    `json:"category"` // 分类：图片 音频 其他
-	Size     int       `json:"size"`
-}
 
 type FinishFileData struct {
 	UID      string  `json:"uid"`
@@ -53,30 +42,44 @@ type ChunkSort struct {
 
 var preFile PreFile
 
+// 文件正则分类
+var regImage = `image/.*`      // 图片
+var regAV = `(video|audio)/.*` // 音频
+
+// 根据文件类型进行分类
+func getCateByType(fileType string) string {
+	reg1 := regexp.MustCompile(regImage)
+	reg2 := regexp.MustCompile(regAV)
+
+	switch {
+	case reg1.MatchString(fileType):
+		return global.SourceCateImg
+	case reg2.MatchString(fileType):
+		return global.SourceCateAV
+	default:
+		return global.SourceCateOther
+	}
+}
+
 // 文件直传
 func UploadFileDirect(c *gin.Context) {
 	// db := global.GlobalDB
 
 	file, err := c.FormFile("file")
-	if err != nil {
+	uid := c.PostForm("uid")
+	fileType := c.PostForm("type")
+	if err != nil || uid == "" || fileType == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
-			"message": "缺少必要参数：file",
+			"message": "缺少必要参数",
 		})
 		return
 	}
 
-	uid := c.PostForm("uid")
+	outPath := fmt.Sprintf("%s/%s/%s", global.StaticPath, getCateByType(fileType), file.Filename)
 
-	_, err1 := os.Stat(global.StaticPath)
-	if os.IsNotExist(err1) {
-		os.Mkdir(global.StaticPath, 0777)
-	}
-
-	outPath := fmt.Sprintf("%s/%s", global.StaticPath, file.Filename)
-
-	err2 := c.SaveUploadedFile(file, outPath)
-	if err2 != nil {
+	err = c.SaveUploadedFile(file, outPath)
+	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeSaveFileError,
 			"message": "文件保存失败",
@@ -118,15 +121,15 @@ func PreUpload(c *gin.Context) {
 	}
 
 	// 移除临时文件目录 防止掺杂其他切片文件
-	err1 := os.RemoveAll("temp")
-	if err1 != nil {
-		panic(err1)
+	err = os.RemoveAll(global.TempPath)
+	if err != nil {
+		panic(err)
 	}
 
 	// 再创建该目录，为存储下一个文件的切片做准备
-	err2 := os.MkdirAll("temp", 0755)
-	if err2 != nil {
-		panic(err2)
+	err = os.MkdirAll(global.TempPath, 0755)
+	if err != nil {
+		panic(err)
 	}
 
 	c.JSON(http.StatusOK, gin.H{
@@ -151,16 +154,9 @@ func UploadChunk(c *gin.Context) {
 		return
 	}
 
-	// 拼接切片临时名称 uid + _currentChunk + ext
-	exts, err := mime.ExtensionsByType(preFile.Type)
-	if err != nil {
-		panic(err)
-	}
+	chunkname := fmt.Sprintf("%v_%v%s", preFile.UID, currentChunk, regexp.MustCompile(`\..*`).FindString(preFile.Name))
 
-	ext := exts[0]
-	chunkname := fmt.Sprintf("%v_%v%s", preFile.UID, currentChunk, ext)
-
-	chunkfile, err := os.Create("temp/" + chunkname)
+	chunkfile, err := os.Create(fmt.Sprintf("%s/%s", global.TempPath, chunkname))
 	if err != nil {
 		panic(err)
 	}
@@ -170,8 +166,8 @@ func UploadChunk(c *gin.Context) {
 		panic(err)
 	}
 
-	_, err1 := io.Copy(chunkfile, chunkReader)
-	if err1 != nil {
+	_, err = io.Copy(chunkfile, chunkReader)
+	if err != nil {
 		panic(err)
 	}
 	// 这里一定要记得都用Close关闭，不然一直打开状态，在合并切片后，
@@ -197,7 +193,7 @@ func UploadChunk(c *gin.Context) {
 // 合并切片
 func MergeChunks(c *gin.Context) {
 	// 获取切片列表
-	entries, err := os.ReadDir("temp")
+	entries, err := os.ReadDir(global.TempPath)
 	if err != nil {
 		panic(err)
 	}
@@ -205,8 +201,7 @@ func MergeChunks(c *gin.Context) {
 	// 从切片文件名中解析出切片序号，组成新的文件列表
 	var chunks []ChunkSort
 	for _, entry := range entries {
-		chunkPiece := strings.Split(entry.Name(), "_")[1]
-		num, err := strconv.Atoi(strings.Split(chunkPiece, ".")[0])
+		num, err := strconv.Atoi(regexp.MustCompile(`.*_(\d+)\..*`).FindStringSubmatch(entry.Name())[1])
 		if err != nil {
 			panic(err)
 		}
@@ -218,13 +213,9 @@ func MergeChunks(c *gin.Context) {
 		return chunks[i].Num < chunks[j].Num
 	})
 
-	// 创建static目录，有就创建，没有就忽略
-	err1 := os.MkdirAll("static", 0755)
-	if err1 != nil {
-		panic(err1)
-	}
+	outFilePath := fmt.Sprintf("%s/%s/%s", global.StaticPath, getCateByType(preFile.Type), preFile.Name)
 
-	file, err := os.Create(fmt.Sprintf("static/%s", preFile.Name))
+	file, err := os.Create(outFilePath)
 	if err != nil {
 		panic(err)
 	}
@@ -232,20 +223,21 @@ func MergeChunks(c *gin.Context) {
 
 	// 遍历合并
 	for _, chunkItem := range chunks {
-		fi, err := os.Open(fmt.Sprintf("temp/%s", chunkItem.Name))
+		tempFilePath := fmt.Sprintf("%s/%s", global.TempPath, chunkItem.Name)
+		fi, err := os.Open(tempFilePath)
 		if err != nil {
 			panic(err)
 		}
 
-		_, err2 := io.Copy(file, fi)
-		if err2 != nil {
-			panic(err2)
+		_, err = io.Copy(file, fi)
+		if err != nil {
+			panic(err)
 		}
 		fi.Close()
 
-		err1 := os.Remove(fmt.Sprintf("temp/%s", chunkItem.Name))
-		if err1 != nil {
-			panic(err1)
+		err = os.Remove(tempFilePath)
+		if err != nil {
+			panic(err)
 		}
 	}
 
@@ -255,7 +247,7 @@ func MergeChunks(c *gin.Context) {
 		"data": FinishFileData{
 			UID:      preFile.UID,
 			Progress: 100,
-			Path:     fmt.Sprintf("http://localhost:4001/static/%s", preFile.Name),
+			Path:     fmt.Sprintf("http://localhost:4001/%s", outFilePath),
 		},
 	})
 }
