@@ -43,6 +43,11 @@ type ChunkSort struct {
 	Num  int
 }
 
+type FileListData struct {
+	Count    int64               `json:"count"`
+	FileList []tables.SourceInfo `json:"fileList"`
+}
+
 var preFile PreFile
 
 // 文件正则分类
@@ -287,21 +292,66 @@ func MergeChunks(c *gin.Context) {
 	})
 }
 
-/*
-根据筛选条件，获取单页文件列表
-- 上传时间 -- 默认降序
-- 文件大小 -- 默认升序
-- 每页数量
-*/
+// 根据筛选条件，获取单页文件列表
 func SelectFileList(c *gin.Context) {
-	// db := global.GlobalDB
-	option := c.Query("option")
-	pageSize := c.GetInt("pageSize")
-	if option == "" || pageSize == 0 {
+	db := global.GlobalDB
+
+	option := c.Query("option")     // 是按上传时间排序还是文件大小排序 data size
+	category := c.Query("category") // 文件类型 image av other
+	sortType := c.Query("sortType") // 排序方式 true-正序 false倒叙
+	pageSize := c.Query("pageSize") // 每次查询数量
+	start := c.Query("start")       // 开始查询位置
+
+	if option == "" || category == "" || sortType == "" || pageSize == "" || start == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
 			"message": "缺少必要参数",
 		})
 		return
 	}
+
+	sortTypeBool, err := strconv.ParseBool(sortType)
+	if err != nil {
+		panic(err)
+	}
+
+	pageSizeInt, err := strconv.Atoi(pageSize)
+	if err != nil {
+		panic(err)
+	}
+
+	startInt, err := strconv.Atoi(start)
+	if err != nil {
+		panic(err)
+	}
+
+	var fileList []tables.SourceInfo
+	var order string
+
+	if sortTypeBool {
+		order = option
+	} else {
+		order = fmt.Sprintf("%s desc", option)
+	}
+
+	result := db.Table("source_info").Where("category", category).Order(order).Limit(pageSizeInt).Offset(startInt).Find(&fileList)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	var count int64
+
+	searchCount := db.Table("source_info").Where("category", category).Count(&count)
+	if searchCount.Error != nil {
+		panic(searchCount.Error)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data": FileListData{
+			Count:    count,
+			FileList: fileList,
+		},
+	})
 }
