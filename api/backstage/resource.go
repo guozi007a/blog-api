@@ -467,22 +467,17 @@ type DeleteParam struct {
 }
 
 func DeleteThorough(c *gin.Context) {
-	// db := global.GlobalDB
+	db := global.GlobalDB
 
 	var temps DeleteParam
-
-	fmt.Println("开始获取参数")
 
 	if err := c.ShouldBind(&temps); err != nil {
 		panic(err)
 	}
 
-	fmt.Printf("temps: %v\n", temps.Temps)
-
 	for _, temp := range temps.Temps {
-		fmt.Printf("temp: %+v\n", temp)
 		// 从数据库中删除
-		// db.Where("uid = ?", uid).Unscoped().Delete(&tables.SourceInfo{})
+		db.Where("uid = ?", temp.UID).Unscoped().Delete(&tables.SourceInfo{})
 
 		// 从资源目录中删除
 		path := fmt.Sprintf("%s/%s/%s", global.StaticPath, temp.Category, temp.Name)
