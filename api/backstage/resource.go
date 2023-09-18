@@ -103,6 +103,7 @@ func UploadFileDirect(c *gin.Context) {
 		Category: getCateByType(fileType),
 		Size:     int(file.Size),
 		Describe: describe,
+		Temp:     false,
 	}
 
 	result := db.Create(&sourceInfo)
@@ -274,6 +275,7 @@ func MergeChunks(c *gin.Context) {
 		Category: getCateByType(preFile.Type),
 		Size:     int(preFile.Size),
 		Describe: preFile.Describe,
+		Temp:     false,
 	}
 
 	result := db.Create(&sourceInfo)
@@ -334,14 +336,14 @@ func SelectFileList(c *gin.Context) {
 		order = fmt.Sprintf("%s desc", option)
 	}
 
-	result := db.Table("source_info").Where("category", category).Order(order).Limit(pageSizeInt).Offset(startInt).Find(&fileList)
+	result := db.Table("source_info").Where("category = ? AND temp = ?", category, false).Order(order).Limit(pageSizeInt).Offset(startInt).Find(&fileList)
 	if result.Error != nil {
 		panic(result.Error)
 	}
 
 	var count int64
 
-	searchCount := db.Table("source_info").Where("category", category).Count(&count)
+	searchCount := db.Table("source_info").Where("category = ? AND temp = ?", category, false).Count(&count)
 	if searchCount.Error != nil {
 		panic(searchCount.Error)
 	}
