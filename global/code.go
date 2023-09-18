@@ -33,3 +33,6 @@ var CodeCopyFileError = "9"
 
 // 存储失败
 var CodeSaveFileError = "10"
+
+// 内容已存在
+var CodeExist = "11"

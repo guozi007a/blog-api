@@ -85,6 +85,22 @@ func UploadFileDirect(c *gin.Context) {
 		return
 	}
 
+	var info tables.SourceInfo
+
+	re := db.Table("source_info").Where("name = ?", file.Filename).Find(&info)
+	if re.Error != nil {
+		panic(re.Error)
+	}
+
+	// 根据文件名称查找，如果文件名已存在，判定为文件已存在，不支持上传，以免错误覆盖
+	if info.ID != 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeExist,
+			"message": "上传内容已存在",
+		})
+		return
+	}
+
 	outPath := fmt.Sprintf("%s/%s/%s", global.StaticPath, getCateByType(fileType), file.Filename)
 
 	err = c.SaveUploadedFile(file, outPath)
@@ -124,7 +140,7 @@ func UploadFileDirect(c *gin.Context) {
 
 // 图片预传
 func PreUpload(c *gin.Context) {
-	// db := global.GlobalDB
+	db := global.GlobalDB
 	file, err := c.FormFile("file")
 	uid := c.PostForm("uid")
 	fileType := c.PostForm("type")
@@ -133,6 +149,21 @@ func PreUpload(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
 			"message": "缺少必要参数",
+		})
+		return
+	}
+
+	var info tables.SourceInfo
+
+	result := db.Table("source_info").Where("name = ?", file.Filename).Find(&info)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	if info.ID != 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeExist,
+			"message": "上传内容已存在",
 		})
 		return
 	}
