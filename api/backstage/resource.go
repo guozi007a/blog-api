@@ -116,7 +116,7 @@ func UploadFileDirect(c *gin.Context) {
 		"message": "success",
 		"data": FinishFileData{
 			UID:      uid,
-			Path:     fmt.Sprintf("http://localhost:4001/%s", outPath),
+			Path:     fmt.Sprintf("%s/%s", global.GlobalOrigin(), outPath),
 			Progress: 100,
 		},
 	})
@@ -289,7 +289,7 @@ func MergeChunks(c *gin.Context) {
 		"data": FinishFileData{
 			UID:      preFile.UID,
 			Progress: 100,
-			Path:     fmt.Sprintf("http://localhost:4001/%s", outFilePath),
+			Path:     fmt.Sprintf("%s/%s", global.GlobalOrigin(), outFilePath),
 		},
 	})
 }
@@ -355,5 +355,103 @@ func SelectFileList(c *gin.Context) {
 			Count:    count,
 			FileList: fileList,
 		},
+	})
+}
+
+// 删除文件(置为临时文件)
+func SetFileTemp(c *gin.Context) {
+	db := global.GlobalDB
+
+	uid := c.PostForm("uid")
+
+	if uid == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数",
+		})
+		return
+	}
+
+	db.Model(&tables.SourceInfo{}).Where("uid = ?", uid).Update("temp", true)
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
+}
+
+// 获取临时文件列表
+func QueryTempFileList(c *gin.Context) {
+	db := global.GlobalDB
+
+	var fileList []tables.SourceInfo
+
+	result := db.Table("source_info").Where("temp = ?", true).Find(&fileList)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	count := int64(len(fileList))
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data": FileListData{
+			Count:    count,
+			FileList: fileList,
+		},
+	})
+}
+
+// 还原和批量还原(将临时文件恢复为正常文件)
+func RestitutionFiles(c *gin.Context) {
+	db := global.GlobalDB
+
+	uids := c.PostFormArray("uids")
+
+	if uids == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数：uids",
+		})
+		return
+	}
+
+	for _, uid := range uids {
+		db.Model(&tables.SourceInfo{}).Where("uid = ?", uid).Update("temp", false)
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
+}
+
+// 删除和批量删除(彻底删除临时文件)
+func DeleteThorough(c *gin.Context) {
+	db := global.GlobalDB
+
+	uids := c.QueryArray("uids")
+
+	fmt.Printf("uids: %v\n", uids)
+
+	if uids == nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数：uids",
+		})
+		return
+	}
+
+	for _, uid := range uids {
+		db.Where("uid = ?", uid).Unscoped().Delete(&tables.SourceInfo{})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
 	})
 }

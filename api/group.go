@@ -22,5 +22,9 @@ func groupRouter(r *gin.Engine) {
 		v1.POST("/chunkUpload", backstage.UploadChunk)
 		v1.GET("/mergeChunks", backstage.MergeChunks)
 		v1.GET("/selectFileList", backstage.SelectFileList)
+		v1.PUT("/setFileTemp", backstage.SetFileTemp)
+		v1.GET("/queryTempFileList", backstage.QueryTempFileList)
+		v1.PUT("/restitutionFiles", backstage.RestitutionFiles)
+		v1.DELETE("/deleteThorough", backstage.DeleteThorough)
 	}
 }
