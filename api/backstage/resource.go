@@ -404,21 +404,22 @@ func QueryTempFileList(c *gin.Context) {
 	})
 }
 
+type RestitutionParam struct {
+	UIDs []string `json:"uids"`
+}
+
 // 还原和批量还原(将临时文件恢复为正常文件)
 func RestitutionFiles(c *gin.Context) {
 	db := global.GlobalDB
 
-	uids := c.PostFormArray("uids")
+	var uids RestitutionParam
 
-	if uids == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeLackRequired,
-			"message": "缺少必要参数：uids",
-		})
-		return
+	if err := c.ShouldBind(&uids); err != nil {
+		panic(err)
 	}
 
-	for _, uid := range uids {
+	for _, uid := range uids.UIDs {
+
 		db.Model(&tables.SourceInfo{}).Where("uid = ?", uid).Update("temp", false)
 	}
 
@@ -430,23 +431,34 @@ func RestitutionFiles(c *gin.Context) {
 }
 
 // 删除和批量删除(彻底删除临时文件)
+type DeleteParam struct {
+	Temps []tables.SourceInfo `json:"temps"`
+}
+
 func DeleteThorough(c *gin.Context) {
-	db := global.GlobalDB
+	// db := global.GlobalDB
 
-	uids := c.QueryArray("uids")
+	var temps DeleteParam
 
-	fmt.Printf("uids: %v\n", uids)
+	fmt.Println("开始获取参数")
 
-	if uids == nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeLackRequired,
-			"message": "缺少必要参数：uids",
-		})
-		return
+	if err := c.ShouldBind(&temps); err != nil {
+		panic(err)
 	}
 
-	for _, uid := range uids {
-		db.Where("uid = ?", uid).Unscoped().Delete(&tables.SourceInfo{})
+	fmt.Printf("temps: %v\n", temps.Temps)
+
+	for _, temp := range temps.Temps {
+		fmt.Printf("temp: %+v\n", temp)
+		// 从数据库中删除
+		// db.Where("uid = ?", uid).Unscoped().Delete(&tables.SourceInfo{})
+
+		// 从资源目录中删除
+		path := fmt.Sprintf("%s/%s/%s", global.StaticPath, temp.Category, temp.Name)
+		err := os.RemoveAll(path)
+		if err != nil {
+			panic(err)
+		}
 	}
 
 	c.JSON(http.StatusOK, gin.H{
