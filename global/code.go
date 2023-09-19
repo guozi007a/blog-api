@@ -36,3 +36,9 @@ var CodeSaveFileError = "10"
 
 // 内容已存在
 var CodeExist = "11"
+
+// 内容不存在
+var CodeNotExist = "12"
+
+// 内容未变更
+var CodeNotModify = "13"

@@ -493,3 +493,81 @@ func DeleteThorough(c *gin.Context) {
 		"data":    true,
 	})
 }
+
+// 修改文件信息--比如重命名文件、修改文件描述等
+func UpdateFileInfo(c *gin.Context) {
+	db := global.GlobalDB
+
+	var fileparam tables.SourceInfo
+
+	if err := c.ShouldBind(&fileparam); err != nil {
+		panic(err)
+	}
+
+	// 先检查文件是否存在
+	var fileQuery tables.SourceInfo
+	result := db.Table("source_info").Where("uid = ?", fileparam.UID).Find(&fileQuery)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	if fileQuery.ID == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeNotExist,
+			"message": "文件不存在，修改失败",
+		})
+		return
+	}
+
+	// 检查文件名是否被修改，如果被修改，再检查是否有文件名重复
+	// 多层判断，可以减少对数据库的操作
+	// 如果修改了文件名且不重名，还需要修改静态目录中的文件名
+	if fileparam.Name == fileQuery.Name && fileparam.Describe == fileQuery.Describe {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeNotModify,
+			"message": "内容未变更",
+		})
+		return
+	}
+
+	if fileparam.Name == fileQuery.Name && fileparam.Describe != fileQuery.Describe {
+		db.Model(&fileQuery).Update("describe", fileparam.Describe)
+
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeOK,
+			"message": "success",
+			"data":    true,
+		})
+		return
+	}
+
+	var fileCheck tables.SourceInfo
+
+	result = db.Table("source_info").Where("name = ?", fileparam.Name).Find(&fileCheck)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	if fileCheck.ID != 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeExist,
+			"message": "文件名已存在，修改失败",
+		})
+		return
+	}
+
+	prePath := fmt.Sprintf("%s/%s/", global.StaticPath, fileparam.Category)
+
+	err := os.Rename(prePath+fileQuery.Name, prePath+fileparam.Name)
+	if err != nil {
+		panic(err)
+	}
+
+	db.Model(&fileQuery).Updates(tables.SourceInfo{Name: fileparam.Name, Describe: fileparam.Describe})
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
+}

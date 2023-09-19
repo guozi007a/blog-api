@@ -26,5 +26,6 @@ func groupRouter(r *gin.Engine) {
 		v1.GET("/queryTempFileList", backstage.QueryTempFileList)
 		v1.PUT("/restitutionFiles", backstage.RestitutionFiles)
 		v1.PUT("/deleteThorough", backstage.DeleteThorough)
+		v1.PUT("/updateFileInfo", backstage.UpdateFileInfo)
 	}
 }
