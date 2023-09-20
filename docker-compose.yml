@@ -16,7 +16,7 @@ services:
     container_name: mysql01
     restart: always
     environment:
-      MYSQL_ROOT_PASSWORD: '123456'
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
       MYSQL_DATABASE: vm50
     volumes:
       - ./mysql-data:/var/lib/mysql
