@@ -11,7 +11,7 @@ import (
 )
 
 func InitMySQL() {
-	sqlDB, err := sql.Open("mysql", dsn)
+	sqlDB, err := sql.Open("mysql", GeneratorDSN())
 	if err != nil {
 		panic(err)
 	}

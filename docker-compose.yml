@@ -17,7 +17,7 @@ services:
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
-      MYSQL_DATABASE: vm50
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
     volumes:
       - ./mysql-data:/var/lib/mysql
     ports:
