@@ -257,3 +257,38 @@ func FindAllLogs(c *gin.Context) {
 		"data":    logs,
 	})
 }
+
+// 删除单条日志
+func DeleteOneLog(c *gin.Context) {
+	db := global.GlobalDB
+
+	id := c.Query("id")
+	date := c.Query("date")
+
+	if id == "" || date == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeLackRequired,
+			"message": "缺少必要参数",
+		})
+		return
+	}
+
+	var logs []tables.DevLogs
+
+	result := db.Table("devlogs").Where("log_id = ?", date).Find(&logs)
+	if result.Error != nil {
+		panic(result.Error)
+	}
+
+	if len(logs) > 1 {
+		db.Where("id = ?", id).Unscoped().Delete(&tables.DevLogs{})
+	} else {
+		db.Where("date = ?", date).Unscoped().Delete(&tables.DateLogs{})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
+}
