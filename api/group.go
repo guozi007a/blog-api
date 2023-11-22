@@ -34,5 +34,6 @@ func groupRouter(r *gin.Engine) {
 	v2 := r.Group("/v2")
 	{
 		v2.POST("/createId", end.CreateId)
+		v2.GET("/searchId", end.SearchId)
 	}
 }

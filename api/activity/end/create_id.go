@@ -34,7 +34,7 @@ type InfoType struct {
 }
 
 type InfoPatch struct {
-	InfoType     InfoType
+	InfoType
 	GenderName   string `json:"genderName"`
 	IdentityName string `json:"identityName"`
 	TalentName   string `json:"talentName"`
