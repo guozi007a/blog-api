@@ -1,6 +1,7 @@
 package api
 
 import (
+	"blog-api/api/activity/end"
 	"blog-api/api/backstage"
 
 	"github.com/gin-gonic/gin"
@@ -28,5 +29,10 @@ func groupRouter(r *gin.Engine) {
 		v1.PUT("/restitutionFiles", backstage.RestitutionFiles)
 		v1.PUT("/deleteThorough", backstage.DeleteThorough)
 		v1.PUT("/updateFileInfo", backstage.UpdateFileInfo)
+	}
+
+	v2 := r.Group("/v2")
+	{
+		v2.POST("/createId", end.CreateId)
 	}
 }
