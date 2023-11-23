@@ -45,3 +45,6 @@ var CodeNotModify = "13"
 
 // 添加数据失败
 var CodeCreateDataFailed = "14"
+
+// 删除数据失败
+var CodeDeleteFailed = "15"
