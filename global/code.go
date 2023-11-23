@@ -42,3 +42,6 @@ var CodeNotExist = "12"
 
 // 内容未变更
 var CodeNotModify = "13"
+
+// 添加数据失败
+var CodeCreateDataFailed = "14"

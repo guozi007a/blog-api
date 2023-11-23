@@ -36,5 +36,7 @@ func groupRouter(r *gin.Engine) {
 		v2.POST("/createId", end.CreateId)
 		v2.GET("/searchId", end.SearchId)
 		v2.POST("/updateIdInfo", end.UpdateIdInfo)
+		v2.POST("/addActivity", end.AddActivity)
+		v2.GET("/searchActivityList", end.SearchActivityList)
 	}
 }
