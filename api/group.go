@@ -2,6 +2,7 @@ package api
 
 import (
 	"blog-api/api/activity/end"
+	"blog-api/api/activity/page"
 	"blog-api/api/backstage"
 
 	"github.com/gin-gonic/gin"
@@ -40,5 +41,10 @@ func groupRouter(r *gin.Engine) {
 		v2.GET("/searchActivityList", end.SearchActivityList)
 		v2.GET("/searchActivityByBranch", end.SearchActivityByBranch)
 		v2.POST("/removeActivity", end.RemoveActivity)
+	}
+
+	v3 := r.Group("/v3")
+	{
+		v3.POST("/login", page.Login)
 	}
 }

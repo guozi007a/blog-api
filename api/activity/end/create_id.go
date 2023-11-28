@@ -10,9 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm/clause"
 
-	"crypto/md5"
-	"fmt"
-	"io"
+	"blog-api/utils"
 )
 
 type InfoType struct {
@@ -45,16 +43,6 @@ type InfoPatch struct {
 var genderList [3]string = [3]string{"男", "女", "保密"}
 var identityList [4]string = [4]string{"用户", "普通主播", "情感厅房主", "情感厅普通主播"}
 var talentList [5]string = [5]string{"唱歌", "跳舞", "二次元", "搞笑", "无"}
-
-// 数据加密
-func secrete(str string) string {
-	h := md5.New()
-	io.WriteString(h, str)
-
-	psd := fmt.Sprintf("%x", h.Sum(nil))
-
-	return psd
-}
 
 func CreateId(c *gin.Context) {
 	db := global.GlobalDB
@@ -92,7 +80,7 @@ func CreateId(c *gin.Context) {
 		UserName:     info.UserName,
 		NickName:     info.NickName,
 		Avatar:       info.Avatar,
-		Password:     secrete(info.Password),
+		Password:     utils.Md5Str(info.Password),
 		Money:        info.Money,
 		Coupon:       info.Coupon,
 		Gender:       info.Gender,
