@@ -19,18 +19,28 @@ func GetProfileInfo(c *gin.Context) {
 
 	cookieUserId, err := c.Cookie("userId")
 	if err != nil {
-		panic(err)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeNotExist,
+			"message": "cookie is not exist",
+			"data":    nil,
+		})
+		return
 	}
 	cookieToken, err := c.Cookie("token")
 	if err != nil {
-		panic(err)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeNotExist,
+			"message": "cookie is not exist",
+			"data":    nil,
+		})
+		return
 	}
 	fmt.Printf("userId: %s\ntoken: %s\n", cookieUserId, cookieToken)
 	if cookieUserId == "" || cookieToken == "" {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeNotExist,
 			"message": "not login",
-			"data":    map[string]interface{}{},
+			"data":    nil,
 		})
 		return
 	}
