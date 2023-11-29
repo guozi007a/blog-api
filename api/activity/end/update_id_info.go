@@ -1,6 +1,7 @@
 package end
 
 import (
+	"fmt"
 	"net/http"
 
 	"blog-api/db_server/tables"
@@ -53,11 +54,12 @@ func UpdateIdInfo(c *gin.Context) {
 	} else {
 		switch k {
 		case "gender":
-			db.Model(&tables.IdInfo{}).Where("userId = ?", id).Updates(&tables.IdInfo{Gender: vi, GenderName: genderList[vi-1]})
+			db.Model(&tables.IdInfo{}).Where("userId = ?", id).Updates(tables.IdInfo{Gender: vi, GenderName: genderList[vi-1]})
 		case "identity":
-			db.Model(&tables.IdInfo{}).Where("userId = ?", id).Updates(&tables.IdInfo{Identity: vi, IdentityName: identityList[vi-1], IsActor: vi != 1})
+			fmt.Printf("vi:%v viType:%T isActor:%t\n", vi, vi, vi != 1)
+			db.Model(&tables.IdInfo{}).Where("userId = ?", id).Select("Identity", "IdentityName", "IsActor").Updates(tables.IdInfo{Identity: vi, IdentityName: identityList[vi-1], IsActor: vi != 1})
 		case "talent":
-			db.Model(&tables.IdInfo{}).Where("userId = ?", id).Updates(&tables.IdInfo{Talent: vi, TalentName: talentList[vi-1]})
+			db.Model(&tables.IdInfo{}).Where("userId = ?", id).Updates(tables.IdInfo{Talent: vi, TalentName: talentList[vi-1]})
 		}
 	}
 	c.JSON(http.StatusOK, gin.H{

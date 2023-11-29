@@ -74,7 +74,6 @@ func CreateId(c *gin.Context) {
 		})
 		return
 	}
-
 	idInfo := &tables.IdInfo{
 		UserId:       info.UserId,
 		UserName:     info.UserName,
