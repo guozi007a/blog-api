@@ -14,7 +14,7 @@ func CreateToken(userId int, nickname string) string {
 		UserId:   userId,
 		NickName: nickname,
 		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(7 * 24 * time.Hour)), // 过期时间，必须在nbf之后
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(global.ActiveToken)), // 过期时间，必须在nbf之后
 			IssuedAt:  jwt.NewNumericDate(time.Now()),                         // 表示创建token的时间
 			NotBefore: jwt.NewNumericDate(time.Now()),                         // 如果生成时间或者有效期时间在该字段时间之前，则token无效
 			Issuer:    "login token",                                          // 表示谁创建的这个token，一般使用项目名或者服务器域名等

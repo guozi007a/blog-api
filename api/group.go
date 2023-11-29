@@ -46,5 +46,6 @@ func groupRouter(r *gin.Engine) {
 	v3 := r.Group("/v3")
 	{
 		v3.POST("/login", page.Login)
+		v3.POST("/logout", page.Logout)
 	}
 }

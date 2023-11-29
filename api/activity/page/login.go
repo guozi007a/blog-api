@@ -10,6 +10,8 @@ import (
 	"blog-api/plugins"
 	"time"
 
+	"strconv"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -85,6 +87,8 @@ func Login(c *gin.Context) {
 	userInfo.IsLogin = true
 	userInfo.Token = _token
 	userInfo.LastLoginDate = now
+	c.SetCookie("userId", strconv.Itoa(info.UserId), global.ActiveCookie, "/", global.ActivityCookieAllowOrigin(), false, false)
+	c.SetCookie("token", _token, global.ActiveCookie, "/", global.ActivityCookieAllowOrigin(), false, false)
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",

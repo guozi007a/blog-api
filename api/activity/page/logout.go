@@ -26,6 +26,8 @@ func Logout(c *gin.Context) {
 	if result.Error != nil {
 		panic(result.Error)
 	}
+	c.SetCookie("userId", "", -1, "/", "", false, false)
+	c.SetCookie("token", "", -1, "/", "", false, false)
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",

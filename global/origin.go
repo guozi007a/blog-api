@@ -15,3 +15,15 @@ func GlobalOrigin() string {
 
 	return origin
 }
+
+func ActivityCookieAllowOrigin() string {
+	var origin string
+
+	if gin.Mode() == "release" {
+		origin = "121.40.42.63."
+	} else {
+		origin = "localhost:3001."
+	}
+
+	return origin
+}
