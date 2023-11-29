@@ -72,17 +72,19 @@ func Login(c *gin.Context) {
 		})
 		return
 	}
+	now := time.Now().UnixMilli()
+	_token := plugins.CreateToken(userInfo.UserId, userInfo.NickName)
 	result = db.Model(&userInfo).Updates(tables.IdInfo{
 		IsLogin:       true,
-		Token:         plugins.CreateToken(userInfo.UserId, userInfo.NickName),
-		LastLoginDate: time.Now().UnixMilli(),
+		Token:         _token,
+		LastLoginDate: now,
 	})
 	if result.Error != nil {
 		panic(result.Error)
 	}
 	userInfo.IsLogin = true
-	userInfo.Token = plugins.CreateToken(userInfo.UserId, userInfo.NickName)
-	userInfo.LastLoginDate = time.Now().UnixMilli()
+	userInfo.Token = _token
+	userInfo.LastLoginDate = now
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",
