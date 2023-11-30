@@ -1,7 +1,6 @@
 package end
 
 import (
-	"fmt"
 	"net/http"
 
 	"blog-api/db_server/tables"
@@ -40,7 +39,6 @@ func SearchActivityList(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("ps: %v, p: %v\n", ps, p)
 	var list []tables.ActivityListInfo
 	result := db.Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&list)
 	if result.Error != nil {
