@@ -17,7 +17,7 @@ import (
 func GetProfileInfo(c *gin.Context) {
 	db := global.GlobalDB
 
-	cookieUserId, err := c.Cookie("userId")
+	cookieUserId, err := c.Cookie("activityUserId")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeNotExist,
@@ -26,7 +26,7 @@ func GetProfileInfo(c *gin.Context) {
 		})
 		return
 	}
-	cookieToken, err := c.Cookie("token")
+	cookieToken, err := c.Cookie("activityToken")
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeNotExist,

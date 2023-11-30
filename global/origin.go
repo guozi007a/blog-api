@@ -20,9 +20,9 @@ func ActivityCookieAllowOrigin() string {
 	var origin string
 
 	if gin.Mode() == "release" {
-		origin = "121.40.42.63."
+		origin = "121.40.42.63"
 	} else {
-		origin = "localhost."
+		origin = "localhost"
 	}
 
 	return origin
