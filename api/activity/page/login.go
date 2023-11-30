@@ -84,9 +84,6 @@ func Login(c *gin.Context) {
 	if result.Error != nil {
 		panic(result.Error)
 	}
-	// userInfo.IsLogin = true
-	// userInfo.Token = _token
-	// userInfo.LastLoginDate = now
 	c.SetCookie("activityUserId", strconv.Itoa(info.UserId), global.ActiveCookie, "/", global.ActivityCookieAllowOrigin(), false, true)
 	c.SetCookie("activityToken", _token, global.ActiveCookie, "/", global.ActivityCookieAllowOrigin(), false, true)
 	c.JSON(http.StatusOK, gin.H{
