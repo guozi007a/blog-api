@@ -15,6 +15,7 @@ type ChargeUser struct {
 	UserId int `json:"userId"`
 	PayId  int `json:"payId"`
 	Money  int `json:"money"`
+	Coupon int `json:"coupon"`
 }
 
 func Charge(c *gin.Context) {
@@ -29,7 +30,8 @@ func Charge(c *gin.Context) {
 		})
 		panic(err)
 	}
-	if chargeUser.UserId == 0 || chargeUser.Money == 0 {
+	// 单次充值只能充值秀币或者欢乐券，不能同时充值两种，即二选一
+	if chargeUser.UserId == 0 || (chargeUser.Money == 0 && chargeUser.Coupon == 0) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeLackRequired,
 			"message": "缺少必要参数",
@@ -79,6 +81,7 @@ func Charge(c *gin.Context) {
 		NickName: userInfo.NickName,
 		PayNick:  payNick,
 		Money:    chargeUser.Money,
+		Coupon:   chargeUser.Coupon,
 		Date:     time.Now().UnixMilli(),
 	})
 	if result.Error != nil {

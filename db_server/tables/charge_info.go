@@ -7,7 +7,8 @@ type ChargeInfo struct {
 	NickName string `json:"nickName" gorm:"column:nickName"`
 	PayNick  string `json:"payNick" gorm:"column:payNick"`
 	Money    int    `json:"money" gorm:"comment:充值金额，单位是秀币，比如充值1元，Money就是1000"`
-	Date     int64  `json:"date" gorm:"comment:充值时间戳"`
+	Coupon   int    `json:"coupon" gorm:"comment:充值的欢乐券"`
+	Date     int64  `json:"date" gorm:"comment:充值时间戳(毫秒级)"`
 }
 
 func (ChargeInfo) TableName() string {

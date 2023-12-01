@@ -48,3 +48,6 @@ var CodeCreateDataFailed = "14"
 
 // 删除数据失败
 var CodeDeleteFailed = "15"
+
+// 参数无效
+var CodeInvalid = "16"
