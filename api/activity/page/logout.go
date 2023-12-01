@@ -19,6 +19,11 @@ func Logout(c *gin.Context) {
 	var info LogoutInfo
 	err := c.ShouldBind(&info)
 	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeGetParamsFailed,
+			"message": "获取参数失败",
+			"data":    nil,
+		})
 		panic(err)
 	}
 	var idInfo tables.IdInfo
@@ -31,8 +36,6 @@ func Logout(c *gin.Context) {
 		})
 		panic(result.Error)
 	}
-	c.SetCookie("activityUserId", "", -1, "/", global.ActivityCookieAllowOrigin(), false, true)
-	c.SetCookie("activityToken", "", -1, "/", global.ActivityCookieAllowOrigin(), false, true)
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",
