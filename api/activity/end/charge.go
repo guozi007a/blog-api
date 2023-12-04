@@ -1,6 +1,7 @@
 package end
 
 import (
+	"database/sql"
 	"net/http"
 	"time"
 
@@ -28,7 +29,7 @@ func Charge(c *gin.Context) {
 			"message": "参数解析失败",
 			"data":    nil,
 		})
-		panic(err)
+		return
 	}
 	// 单次充值只能充值秀币或者欢乐券，不能同时充值两种，即二选一
 	if chargeUser.UserId == 0 || (chargeUser.Money == 0 && chargeUser.Coupon == 0) {
@@ -40,15 +41,22 @@ func Charge(c *gin.Context) {
 		return
 	}
 	var chargeInfo tables.ChargeInfo
-	var maxId *int64
-	result := db.Table(chargeInfo.TableName()).Select("max(id)").Scan(&maxId)
+	// 这里定义sql.NullInt64为了处理表格中为空的情况
+	var _maxId sql.NullInt64
+	var maxId int
+	result := db.Table(chargeInfo.TableName()).Select("max(id)").Scan(&_maxId)
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeCreateDataFailed,
 			"message": "充值失败",
 			"data":    nil,
 		})
-		panic(result.Error)
+		return
+	}
+	if _maxId.Valid { // 如果_maxId不为空
+		maxId = int(_maxId.Int64)
+	} else { // 为空
+		maxId = 0
 	}
 	var userInfo tables.IdInfo
 	result = db.Table(userInfo.TableName()).Where("userId = ?", chargeUser.UserId).Find(&userInfo)
@@ -58,7 +66,7 @@ func Charge(c *gin.Context) {
 			"message": "充值失败",
 			"data":    nil,
 		})
-		panic(result.Error)
+		return
 	}
 	payNick := ""
 	if chargeUser.PayId != 0 {
@@ -70,12 +78,12 @@ func Charge(c *gin.Context) {
 				"message": "充值失败",
 				"data":    nil,
 			})
-			panic(result.Error)
+			return
 		}
 		payNick = payUser.NickName
 	}
 	result = db.Clauses(clause.OnConflict{DoNothing: true}).Create(tables.ChargeInfo{
-		ID:       int(*maxId) + 1,
+		ID:       maxId + 1,
 		UserId:   chargeUser.UserId,
 		PayId:    chargeUser.PayId,
 		NickName: userInfo.NickName,
@@ -90,7 +98,7 @@ func Charge(c *gin.Context) {
 			"message": "充值失败",
 			"data":    nil,
 		})
-		panic(result.Error)
+		return
 	}
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
