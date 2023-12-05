@@ -13,10 +13,10 @@ import (
 )
 
 type ChargeUser struct {
-	UserId int `json:"userId"`
-	PayId  int `json:"payId"`
-	Money  int `json:"money"`
-	Coupon int `json:"coupon"`
+	UserId int   `json:"userId"`
+	PayId  int   `json:"payId"`
+	Money  int64 `json:"money"`
+	Coupon int64 `json:"coupon"`
 }
 
 func Charge(c *gin.Context) {
@@ -68,6 +68,14 @@ func Charge(c *gin.Context) {
 		})
 		return
 	}
+	if userInfo.UserId == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeNotExist,
+			"message": "用户不存在",
+			"data":    nil,
+		})
+		return
+	}
 	payNick := ""
 	if chargeUser.PayId != 0 {
 		var payUser tables.IdInfo
@@ -76,6 +84,14 @@ func Charge(c *gin.Context) {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeCreateDataFailed,
 				"message": "充值失败",
+				"data":    nil,
+			})
+			return
+		}
+		if payUser.UserId == 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeNotExist,
+				"message": "用户不存在",
 				"data":    nil,
 			})
 			return
@@ -92,6 +108,28 @@ func Charge(c *gin.Context) {
 		Coupon:   chargeUser.Coupon,
 		Date:     time.Now().UnixMilli(),
 	})
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeCreateDataFailed,
+			"message": "充值失败",
+			"data":    nil,
+		})
+		return
+	}
+	// 更新用户列表中的金额数量
+	chargeType := ""
+	var count int64 = 0
+	var total int64 = 0
+	if chargeUser.Money != 0 {
+		chargeType = "money"
+		count = userInfo.Money
+		total = count + chargeUser.Money
+	} else if chargeUser.Coupon != 0 {
+		chargeType = "coupon"
+		count = userInfo.Coupon
+		total = count + chargeUser.Coupon
+	}
+	result = db.Model(&tables.IdInfo{}).Where("userId = ?", chargeUser.UserId).Update(chargeType, total)
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeCreateDataFailed,

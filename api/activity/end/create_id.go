@@ -19,8 +19,8 @@ type InfoType struct {
 	NickName   string `json:"nickName" form:"nickName"`
 	Avatar     string `json:"avatar" form:"avatar"`
 	Password   string `json:"password" form:"password"`
-	Money      int32  `json:"money" form:"money"`
-	Coupon     int32  `json:"coupon" form:"coupon"`
+	Money      int64  `json:"money" form:"money"`
+	Coupon     int64  `json:"coupon" form:"coupon"`
 	Gender     int    `json:"gender" form:"gender"`
 	Identity   int    `json:"identity" form:"identity"`
 	UserLevel  int    `json:"userLevel" form:"userLevel"`

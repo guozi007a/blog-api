@@ -6,8 +6,8 @@ type IdInfo struct {
 	NickName      string `json:"nickName" gorm:"column:nickName;comment:用户昵称"`
 	Avatar        string `json:"avatar" gorm:"column:avatar;comment:头像图片地址"`
 	Password      string `json:"password" gorm:"column:password;comment:MD5加密后的密码"`
-	Money         int32  `json:"money" gorm:"column:money;comment:秀币余额"`
-	Coupon        int32  `json:"coupon" gorm:"column:coupon;comment:欢乐券余额"`
+	Money         int64  `json:"money" gorm:"column:money;comment:秀币余额"`
+	Coupon        int64  `json:"coupon" gorm:"column:coupon;comment:欢乐券余额"`
 	Gender        int    `json:"gender" gorm:"column:gender;comment:性别编号"`
 	Identity      int    `json:"identity" gorm:"column:identity;comment:身份类型编号"`
 	UserLevel     int    `json:"userLevel" gorm:"column:userLevel;comment:用户等级编号"`
