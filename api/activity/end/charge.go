@@ -104,8 +104,8 @@ func Charge(c *gin.Context) {
 		PayId:    chargeUser.PayId,
 		NickName: userInfo.NickName,
 		PayNick:  payNick,
-		Money:    chargeUser.Money,
-		Coupon:   chargeUser.Coupon,
+		Money:    chargeUser.Money * 1000,
+		Coupon:   chargeUser.Coupon * 1000,
 		Date:     time.Now().UnixMilli(),
 	})
 	if result.Error != nil {
@@ -123,11 +123,11 @@ func Charge(c *gin.Context) {
 	if chargeUser.Money != 0 {
 		chargeType = "money"
 		count = userInfo.Money
-		total = count + chargeUser.Money
+		total = count + chargeUser.Money*1000
 	} else if chargeUser.Coupon != 0 {
 		chargeType = "coupon"
 		count = userInfo.Coupon
-		total = count + chargeUser.Coupon
+		total = count + chargeUser.Coupon*1000
 	}
 	result = db.Model(&tables.IdInfo{}).Where("userId = ?", chargeUser.UserId).Update(chargeType, total)
 	if result.Error != nil {
