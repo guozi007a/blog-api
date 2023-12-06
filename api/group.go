@@ -52,4 +52,9 @@ func groupRouter(r *gin.Engine) {
 		v3.POST("/logout", page.Logout)
 		v3.GET("/profileInfo", page.GetProfileInfo)
 	}
+
+	activity := r.Group("/activity")
+	{
+
+	}
 }

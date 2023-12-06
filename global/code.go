@@ -51,3 +51,27 @@ var CodeDeleteFailed = "15"
 
 // 参数无效
 var CodeInvalid = "16"
+
+// 未登录
+var CodeNotLogin = "17"
+
+// 数据错误
+var CodeDataError = "18"
+
+// 活动未开始
+var CodeNotStart = "19"
+
+// 活动已结束
+var CodeFinished = "20"
+
+// 参数有误
+var CodeParamError = "21"
+
+// 重复操作
+var CodeRunAgain = "22"
+
+// 无权限
+var CodeAuthyLimited = "23"
+
+// 奖池超限
+var CodeAwardPoolOutLimited = "24"
