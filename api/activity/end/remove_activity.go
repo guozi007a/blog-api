@@ -16,7 +16,7 @@ type RemoveParam struct {
 func RemoveActivity(c *gin.Context) {
 	db := global.GlobalDB
 	var branch RemoveParam
-	err := c.ShouldBind(&branch)
+	err := c.BindJSON(&branch)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,

@@ -7,10 +7,10 @@ type ActivityListInfo struct {
 	Tag         string `json:"tag" gorm:"comment:活动类型,例如节日活动"`
 	Url         string `json:"url" gorm:"comment:活动地址"`
 	CreateDate  int64  `json:"createDate" gorm:"comment:记录新增该活动时的时间戳;column:createDate"`
-	DateStart   string `json:"dateStart" gorm:"column:dateStart;comment:活动开始时间，如2023-12-06 10:46:32"`
-	DateEnd     string `json:"dateEnd" gorm:"column:dateEnd;comment:活动结束时间"`
-	MoudleStart string `json:"moudleStart" gorm:"column:moudleStart;comment:活动中某个模块开始时间，如2023-12-06 10:46:32"`
-	MoudleEnd   string `json:"moudleEnd" gorm:"column:moudleEnd;comment:活动中某个模块结束时间"`
+	DateStart   int64  `json:"dateStart" gorm:"column:dateStart;comment:活动开始时间，如2023-12-06 10:46:32"`
+	DateEnd     int64  `json:"dateEnd" gorm:"column:dateEnd;comment:活动结束时间"`
+	MoudleStart int64  `json:"moudleStart" gorm:"column:moudleStart;comment:活动中某个模块开始时间，如2023-12-06 10:46:32"`
+	MoudleEnd   int64  `json:"moudleEnd" gorm:"column:moudleEnd;comment:活动中某个模块结束时间"`
 }
 
 func (ActivityListInfo) TableName() string {

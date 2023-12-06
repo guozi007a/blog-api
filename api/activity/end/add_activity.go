@@ -7,8 +7,6 @@ import (
 	"blog-api/db_server/tables"
 	"blog-api/global"
 
-	"blog-api/utils"
-
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm/clause"
 )
@@ -101,11 +99,11 @@ func AddActivity(c *gin.Context) {
 		Name:        name,
 		Tag:         tag,
 		Url:         url,
-		CreateDate:  time.Now().Unix(),
-		DateStart:   utils.FormatDateStr(dst),
-		DateEnd:     utils.FormatDateStr(det),
-		MoudleStart: utils.FormatDateStr(mst),
-		MoudleEnd:   utils.FormatDateStr(met),
+		CreateDate:  time.Now().UnixMilli(),
+		DateStart:   dst.UnixMilli(),
+		DateEnd:     det.UnixMilli(),
+		MoudleStart: mst.UnixMilli(),
+		MoudleEnd:   met.UnixMilli(),
 	}
 	result = db.Clauses(clause.OnConflict{DoNothing: true}).Create(&info)
 	if result.Error != nil {
@@ -114,5 +112,11 @@ func AddActivity(c *gin.Context) {
 			"message": "添加失败",
 			"data":    nil,
 		})
+		return
 	}
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "success",
+		"data":    true,
+	})
 }
