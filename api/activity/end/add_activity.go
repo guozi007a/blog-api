@@ -99,7 +99,6 @@ func AddActivity(c *gin.Context) {
 		Name:        name,
 		Tag:         tag,
 		Url:         url,
-		CreateDate:  time.Now().UnixMilli(),
 		DateStart:   dst.UnixMilli(),
 		DateEnd:     det.UnixMilli(),
 		MoudleStart: mst.UnixMilli(),
