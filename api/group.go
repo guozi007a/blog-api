@@ -3,6 +3,7 @@ package api
 import (
 	"blog-api/api/activity/end"
 	"blog-api/api/activity/page"
+	"blog-api/api/activity/page/play_2399"
 	"blog-api/api/backstage"
 
 	"github.com/gin-gonic/gin"
@@ -55,6 +56,6 @@ func groupRouter(r *gin.Engine) {
 
 	activity := r.Group("/activity")
 	{
-
+		activity.POST("/2399/sign", play_2399.Sign)
 	}
 }

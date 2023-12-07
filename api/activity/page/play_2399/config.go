@@ -1,4 +1,4 @@
-package play2399
+package play_2399
 
 var (
 	ACTIVITY_BRANCH       = "play_2399"

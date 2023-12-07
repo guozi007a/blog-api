@@ -8,6 +8,7 @@ type Play_2399_Sign_List struct {
 	Date            int64    `json:"date" gorm:"comment:签到时间，未签到时值为0，签到后值为签到时间的时间戳"`
 	Awards          []string `json:"awards" gorm:"comment:签到获得的奖励列表，未签到时为空列表"`
 	TotalAwardMoney int64    `json:"totalAwardMoney" gorm:"column:totalAwardMoney;comment:当前已发放的签到礼物总价值，单位秀币"`
+	CreateDate      int64    `json:"createDate" gorm:"column:createDate;autoCreateTime:milli;comment:创建该记录的毫秒级时间戳"`
 }
 
 func (Play_2399_Sign_List) TableName() string {

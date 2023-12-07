@@ -75,3 +75,6 @@ var CodeAuthyLimited = "23"
 
 // 奖池超限
 var CodeAwardPoolOutLimited = "24"
+
+// 更新失败
+var CodeUpdateFailed = "25"

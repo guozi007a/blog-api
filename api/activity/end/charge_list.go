@@ -20,6 +20,12 @@ type ChargeListItem struct {
 	Page      int   `json:"page"`
 }
 
+type ChargeRow struct {
+	tables.ChargeInfo
+	NickName string `json:"nickName" gorm:"column:nickName"` // 这里需要带上gorm的column命名
+	PayNick  string `json:"payNick" gorm:"column:payNick"`
+}
+
 func GetChargeList(c *gin.Context) {
 	db := global.GlobalDB
 	userId := c.Query("userId")
@@ -61,25 +67,25 @@ func GetChargeList(c *gin.Context) {
 		return
 	}
 	var tb tables.ChargeInfo
-	var chargeList []tables.ChargeInfo
+	var chargeList []ChargeRow
 	var total int64
 	if uid == 0 && pid == 0 && start == 0 && end == 0 { /* search all */
-		db.Table(tb.TableName()).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
+		db.Table(tb.TableName()).Select("charge_info.*, user.nickName, payer.nickName as payNick").Joins("left join id_info as user on charge_info.userId = user.userId").Joins("left join id_info as payer on charge_info.payId = payer.userId").Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
 		db.Table(tb.TableName()).Count(&total)
 	} else if uid != 0 && pid == 0 && start == 0 && end == 0 { /* search by uid */
-		db.Table(tb.TableName()).Where("userId = ?", uid).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
+		db.Table(tb.TableName()).Select("charge_info.*, user.nickName, payer.nickName as payNick").Joins("left join id_info as user on charge_info.userId = user.userId").Joins("left join id_info as payer on charge_info.payId = payer.userId").Where("userId = ?", uid).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
 		db.Model(&tables.ChargeInfo{}).Where("userId = ?", uid).Count(&total)
 	} else if uid == 0 && pid != 0 && start == 0 && end == 0 { /* search by pid */
-		db.Table(tb.TableName()).Where("payId = ?", pid).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
+		db.Table(tb.TableName()).Select("charge_info.*, user.nickName, payer.nickName as payNick").Joins("left join id_info as user on charge_info.userId = user.userId").Joins("left join id_info as payer on charge_info.payId = payer.userId").Where("payId = ?", pid).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
 		db.Model(&tables.ChargeInfo{}).Where("payId = ?", pid).Count(&total)
 	} else if uid == 0 && pid == 0 && ((start != 0 && end == 0) || (start == 0 && end != 0) || (start != 0 && end != 0)) { /* search by start and end */
-		db.Table(tb.TableName()).Where("date >= ? AND date <= ?", start, end).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
+		db.Table(tb.TableName()).Select("charge_info.*, user.nickName, payer.nickName as payNick").Joins("left join id_info as user on charge_info.userId = user.userId").Joins("left join id_info as payer on charge_info.payId = payer.userId").Where("date >= ? AND date <= ?", start, end).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
 		db.Model(&tables.ChargeInfo{}).Where("date >= ? AND date <= ?", start, end).Count(&total)
 	} else if uid != 0 && pid != 0 && start == 0 && end == 0 { /* search by uid and pid */
-		db.Table(tb.TableName()).Where("userId = ? AND payId = ?", uid, pid).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
+		db.Table(tb.TableName()).Select("charge_info.*, user.nickName, payer.nickName as payNick").Joins("left join id_info as user on charge_info.userId = user.userId").Joins("left join id_info as payer on charge_info.payId = payer.userId").Where("userId = ? AND payId = ?", uid, pid).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
 		db.Model(&tables.ChargeInfo{}).Where("userId = ? AND payId = ?", uid, pid).Count(&total)
 	} else { /* search by uid and pid and start and end */
-		db.Table(tb.TableName()).Where("userId = ? AND payId = ? AND date >= ? AND date <= ?", uid, pid, start, end).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
+		db.Table(tb.TableName()).Select("charge_info.*, user.nickName, payer.nickName as payNick").Joins("left join id_info as user on charge_info.userId = user.userId").Joins("left join id_info as payer on charge_info.payId = payer.userId").Where("userId = ? AND payId = ? AND date >= ? AND date <= ?", uid, pid, start, end).Order("id desc").Limit(ps).Offset((p - 1) * ps).Find(&chargeList)
 		db.Model(&tables.ChargeInfo{}).Where("userId = ? AND payId = ? AND date >= ? AND date <= ?", uid, pid, start, end).Count(&total)
 	}
 	c.JSON(http.StatusOK, gin.H{

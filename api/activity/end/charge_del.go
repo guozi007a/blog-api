@@ -26,6 +26,8 @@ func ChargeDel(c *gin.Context) {
 		})
 		return
 	}
+
+	// 删除指定记录
 	result := db.Where("id = ?", param.ID).Unscoped().Delete(&tables.ChargeInfo{})
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
@@ -35,6 +37,7 @@ func ChargeDel(c *gin.Context) {
 		})
 		return
 	}
+
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,
 		"message": "success",
