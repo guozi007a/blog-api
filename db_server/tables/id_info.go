@@ -19,7 +19,7 @@ type IdInfo struct {
 	GenderName    string `json:"genderName" gorm:"column:genderName;comment:性别名称"`
 	IdentityName  string `json:"identityName" gorm:"column:identityName;comment:身份类型名称"`
 	TalentName    string `json:"talentName" gorm:"column:talentName;comment:分区名称"`
-	CreateDate    int64  `json:"createDate" gorm:"column:createDate;comment:创建该id的时间戳"`
+	CreateDate    int64  `json:"createDate" gorm:"column:createDate;comment:创建该id的时间戳;autoCreateTime:milli"`
 	IsActor       bool   `json:"isActor" gorm:"column:isActor;comment:是否是主播身份"`
 	IsLogin       bool   `json:"isLogin" gorm:"column:isLogin;comment:是否处于登录状态"`
 	LastLoginDate int64  `json:"lastLoginDate" gorm:"column:lastLoginDate;comment:上一次主动登录的时间戳"`

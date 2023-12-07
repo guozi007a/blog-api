@@ -2,7 +2,6 @@ package end
 
 import (
 	"net/http"
-	"time"
 
 	"blog-api/db_server/tables"
 	"blog-api/global"
@@ -93,7 +92,6 @@ func CreateId(c *gin.Context) {
 		GenderName:   genderList[info.Gender-1],
 		IdentityName: identityList[info.Identity-1],
 		TalentName:   talentList[info.Talent-1],
-		CreateDate:   time.Now().UnixMilli(),
 		IsActor:      info.Identity != 1,
 	}
 
