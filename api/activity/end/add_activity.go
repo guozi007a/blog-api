@@ -75,26 +75,7 @@ func AddActivity(c *gin.Context) {
 		}
 		met = _met
 	}
-	var info tables.ActivityListInfo
-	// 查询当前最大id
-	var maxId *int64
-	var currentId int
-	result := db.Model(&tables.ActivityListInfo{}).Select("max(id)").Scan(&maxId)
-	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeQueryFailed,
-			"message": "id获取失败",
-			"data":    nil,
-		})
-		return
-	}
-	if maxId != nil {
-		currentId = int(*maxId) + 1
-	} else {
-		currentId = 1
-	}
-	info = tables.ActivityListInfo{
-		ID:          currentId,
+	info := tables.ActivityListInfo{
 		Branch:      branch,
 		Name:        name,
 		Tag:         tag,
@@ -104,7 +85,7 @@ func AddActivity(c *gin.Context) {
 		MoudleStart: mst.UnixMilli(),
 		MoudleEnd:   met.UnixMilli(),
 	}
-	result = db.Clauses(clause.OnConflict{DoNothing: true}).Create(&info)
+	result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&info)
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeCreateDataFailed,
