@@ -2,24 +2,115 @@ package play_2399
 
 import (
 	"net/http"
+	"time"
 
+	"blog-api/db_server/tables"
 	"blog-api/global"
+	"blog-api/utils"
+
+	"strconv"
 
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm/clause"
 )
 
+type DayChargeTotal struct {
+	Total int64 `json:"total"`
+}
+
 func SignInfo(c *gin.Context) {
-	// db := global.GlobalDB
+	db := global.GlobalDB
 
 	userId := c.Request.Header.Get("userId")
 	token := c.Request.Header.Get("token")
 
-	if userId == "" || token == "" {
+	if userId == "" || token == "" { // 未传参
 		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeAuthyLimited,
-			"message": "无法签到",
+			"code":    global.CodeOK,
+			"message": "",
 			"data":    0,
 		})
 		return
 	}
+	uid, err := strconv.Atoi(userId)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeParamError,
+			"message": "参数有误",
+			"data":    nil,
+		})
+		return
+	}
+
+	var activityInfo tables.ActivityListInfo
+	result := db.Table(activityInfo.TableName()).Where("branch = ?", ACTIVITY_BRANCH).Find(&activityInfo)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeQueryFailed,
+			"message": "查询失败",
+			"data":    nil,
+		})
+		return
+	}
+	if time.Now().UnixMilli() < activityInfo.DateStart || time.Now().UnixMilli() > activityInfo.DateEnd { // 非活动时间
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeOK,
+			"message": "",
+			"data":    0,
+		})
+		return
+	}
+
+	s, e := utils.DayMilli(time.Now())
+	var signInfo tables.Play_2399_Sign_List
+	result = db.Table(signInfo.TableName()).Where("userId = ? AND createDate BETWEEN ? AND ?", uid, s, e).Find(&signInfo)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeQueryFailed,
+			"message": "查询失败",
+			"data":    nil,
+		})
+		return
+	}
+	if signInfo.ID == 0 { // 没查到记录
+		var dayChargeTotal DayChargeTotal
+		result := db.Model(&tables.ChargeInfo{}).Select("sum(money)").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Scan(&dayChargeTotal)
+		if result.Error != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeQueryFailed,
+				"message": "查询失败",
+				"data":    nil,
+			})
+			return
+		}
+		status := 0
+		if dayChargeTotal.Total >= int64(DAY_CHARGE_LIMIT*1000) {
+			status = 1
+		}
+		newSignInfo := tables.Play_2399_Sign_List{ // 先初始化记录，再创建
+			UserId: uid,
+			Status: status,
+		}
+		result = db.Clauses(clause.OnConflict{DoNothing: true}).Create(&newSignInfo)
+		if result.Error != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeCreateDataFailed,
+				"message": "创建失败",
+				"data":    nil,
+			})
+			return
+		}
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeOK,
+			"message": "",
+			"data":    status,
+		})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code":    global.CodeOK,
+		"message": "",
+		"data":    signInfo.Status,
+	})
 }

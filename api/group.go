@@ -57,5 +57,6 @@ func groupRouter(r *gin.Engine) {
 	activity := r.Group("/activity")
 	{
 		activity.POST("/2399/sign", play_2399.Sign)
+		activity.GET("/2399/signInfo", play_2399.SignInfo)
 	}
 }

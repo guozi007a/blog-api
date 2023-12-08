@@ -19,16 +19,6 @@ type ActivityInfo struct {
 	DateEnd   int64 `json:"dateEnd"`
 }
 
-type DayChargeSum struct {
-	MoneyTotal int64 `json:"moneyTotal"`
-}
-
-type UpdateInfo struct {
-	Status int      `json:"status"`
-	Date   int64    `json:"date"`
-	Awards []string `json:"awards"`
-}
-
 func Sign(c *gin.Context) {
 	db := global.GlobalDB
 
@@ -68,7 +58,7 @@ func Sign(c *gin.Context) {
 	if activityInfo.DateStart == 0 || activityInfo.DateEnd == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeDataError,
-			"message": "数据有误",
+			"message": "还未添加活动时间",
 			"data":    nil,
 		})
 		return
@@ -115,15 +105,16 @@ func Sign(c *gin.Context) {
 		case 0:
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeAuthyLimited,
-				"message": "未达到签到条件",
+				"message": "未达到签到资格",
 				"data":    nil,
 			})
 		case 1:
-			result = db.Model(&tables.Play_2399_Sign_List{}).Where("userId = ? AND createDate BETWEEN ? AND ?", uid, s, e).Updates(UpdateInfo{
+			updateSignInfo := tables.Play_2399_Sign_List{
 				Status: 2,
 				Date:   time.Now().UnixMilli(),
-				Awards: []string{"a"},
-			})
+				Awards: []string{SIGN_STABLE_AWARD, SIGN_RANDOM_AWARDS[utils.RandInt(len(SIGN_RANDOM_AWARDS))]},
+			}
+			result = db.Model(&tables.Play_2399_Sign_List{}).Where("userId = ? AND createDate BETWEEN ? AND ?", uid, s, e).Updates(updateSignInfo)
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeOK,
 				"message": "success",

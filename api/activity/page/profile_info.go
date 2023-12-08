@@ -76,8 +76,11 @@ func GetProfileInfo(c *gin.Context) {
 	now := time.Now().UnixMilli()
 	if expTime < now {
 		db.Model(&tables.IdInfo{}).Select("isLogin", "token").Where("userId = ?", uid).Updates(tables.IdInfo{IsLogin: false, Token: ""})
-		c.JSON(http.StatusOK, gin.H{})
-		log.Fatalln("token过期了")
+		c.JSON(http.StatusUnauthorized, gin.H{
+			"code":    global.CodeTokenInvalid,
+			"message": "Token失效",
+			"data":    nil,
+		})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{
