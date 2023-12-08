@@ -78,3 +78,9 @@ var CodeAwardPoolOutLimited = "24"
 
 // 更新失败
 var CodeUpdateFailed = "25"
+
+// token签名失败
+var CodeSignTokenError = "26"
+
+// token失效
+var CodeTokenInvalid = "27"

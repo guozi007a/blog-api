@@ -72,10 +72,10 @@ func GetProfileInfo(c *gin.Context) {
 		return
 	}
 	claims := plugins.ParseToken(profile.Token)
-	expTime := claims.RegisteredClaims.ExpiresAt.Unix()
-	now := time.Now().Unix()
+	expTime := claims.RegisteredClaims.ExpiresAt.UnixMilli()
+	now := time.Now().UnixMilli()
 	if expTime < now {
-		// db.Model(&idInfo).Where("userId = ?", uid).Select("isLogin", "token").Updates(tables.IdInfo{IsLogin: false, Token: ""})
+		db.Model(&tables.IdInfo{}).Select("isLogin", "token").Where("userId = ?", uid).Updates(tables.IdInfo{IsLogin: false, Token: ""})
 		c.JSON(http.StatusOK, gin.H{})
 		log.Fatalln("token过期了")
 		return

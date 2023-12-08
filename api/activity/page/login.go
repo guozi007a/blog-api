@@ -53,6 +53,14 @@ func Login(c *gin.Context) {
 	}
 	now := time.Now().UnixMilli()
 	_token := plugins.CreateToken(userInfo.UserId, userInfo.NickName)
+	if _token == "" {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeSignTokenError,
+			"message": "Token签名失败",
+			"data":    nil,
+		})
+		return
+	}
 	result = db.Model(&userInfo).Updates(tables.IdInfo{
 		IsLogin:       true,
 		Token:         _token,

@@ -2,13 +2,9 @@ package end
 
 import (
 	"net/http"
-	"time"
 
 	"blog-api/db_server/tables"
 	"blog-api/global"
-
-	"blog-api/api/activity/page/play_2399"
-	"blog-api/utils"
 
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
@@ -102,59 +98,6 @@ func Charge(c *gin.Context) {
 				"data":    nil,
 			})
 			return
-		}
-	}
-
-	// 在活动时间内，更新play_2399的签到信息
-	var activityInfo tables.ActivityListInfo
-	result := db.Where("branch = ?", play_2399.ACTIVITY_BRANCH).Find(&activityInfo)
-	if result.Error != nil {
-		c.JSON(http.StatusOK, gin.H{
-			"code":    global.CodeQueryFailed,
-			"message": "查询信息失败",
-			"data":    nil,
-		})
-		return
-	}
-	if utils.NowMilli() > activityInfo.DateStart && utils.NowMilli() < activityInfo.DateEnd {
-		var signInfo tables.Play_2399_Sign_List
-		s, e := utils.DayMilli(time.Now())
-		result = db.Where("userId = ? AND createDate BETWEEN ? AND ?", chargeUser.UserId, s, e).Find(&signInfo)
-		if result.Error != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    global.CodeQueryFailed,
-				"message": "查询信息失败",
-				"data":    nil,
-			})
-			return
-		}
-
-		var totalCharge DayChargeTotal
-		result = db.Model(&tables.ChargeInfo{}).Where("userId = ? AND date BETWEEN ? AND ? AND type = ?", chargeUser.UserId, s, e, "money").Select("sum(count)").Scan(&totalCharge)
-		if result.Error != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    global.CodeQueryFailed,
-				"message": "查询信息失败",
-				"data":    nil,
-			})
-			return
-		}
-
-		status := 0
-		if totalCharge.Total >= int64(play_2399.DAY_CHARGE_LIMIT*1000) {
-			status = 1
-		}
-
-		if signInfo.ID == 0 {
-			sign_info := tables.Play_2399_Sign_List{
-				UserId: chargeUser.UserId,
-				Status: status,
-			}
-			db.Clauses(clause.OnConflict{DoNothing: true}).Create(&sign_info)
-		} else {
-			if signInfo.Status == 0 && status == 1 {
-				db.Model(&tables.Play_2399_Sign_List{}).Where("userId = ? AND createDate BETWEEN ? AND ?", chargeUser.UserId, s, e).Update("status", 1)
-			}
 		}
 	}
 
