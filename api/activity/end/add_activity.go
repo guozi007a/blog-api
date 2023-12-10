@@ -31,7 +31,7 @@ func AddActivity(c *gin.Context) {
 		return
 	}
 
-	dst, err := time.Parse("2006-01-02 15:04:05", dateStart)
+	dst, err := time.Parse(global.COMMON_TIME_FORMAT, dateStart)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,
@@ -40,7 +40,7 @@ func AddActivity(c *gin.Context) {
 		})
 		return
 	}
-	det, err := time.Parse("2006-01-02 15:04:05", dateEnd)
+	det, err := time.Parse(global.COMMON_TIME_FORMAT, dateEnd)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,
@@ -51,7 +51,7 @@ func AddActivity(c *gin.Context) {
 	}
 	var mst time.Time
 	if moudleStart != "" {
-		_mst, err := time.Parse("2006-01-02 15:04:05", moudleStart)
+		_mst, err := time.Parse(global.COMMON_TIME_FORMAT, moudleStart)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeFormatError,
@@ -64,7 +64,7 @@ func AddActivity(c *gin.Context) {
 	}
 	var met time.Time
 	if moudleEnd != "" {
-		_met, err := time.Parse("2006-01-02 15:04:05", moudleEnd)
+		_met, err := time.Parse(global.COMMON_TIME_FORMAT, moudleEnd)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeFormatError,

@@ -5,11 +5,16 @@ import (
 	"blog-api/api/activity/page"
 	"blog-api/api/activity/page/play_2399"
 	"blog-api/api/backstage"
+	"blog-api/api/test_api"
 
 	"github.com/gin-gonic/gin"
 )
 
 func groupRouter(r *gin.Engine) {
+	test := r.Group("/test")
+	{
+		test.GET("/checkTime", test_api.CheckTime)
+	}
 
 	v1 := r.Group("/v1")
 	{

@@ -13,7 +13,7 @@ var (
 	host     string                                       // 域名
 	port     = "3306"                                     // 数据库端口
 	dbname   string                                       //数据库名称
-	extra    = "charset=utf8mb4&parseTime=True&loc=Local" // 其他配置
+	extra    = "charset=utf8mb4&parseTime=True&loc=Local" // 其他配置，如果使用世界标准时间，就改为loc=UTC
 )
 
 func GeneratorDSN() string {
