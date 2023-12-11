@@ -1,6 +1,7 @@
 package play_2399
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -75,6 +76,7 @@ func SignInfo(c *gin.Context) {
 
 	var dayChargeTotal DayChargeTotal
 	db.Model(&tables.ChargeInfo{}).Select("sum(count) as total").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Find(&dayChargeTotal)
+	fmt.Printf("充值总额：%v\n", dayChargeTotal.Total)
 	status := 0
 	if dayChargeTotal.Total >= int64(DAY_CHARGE_LIMIT*1000) {
 		status = 1

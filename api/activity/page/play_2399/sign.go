@@ -93,6 +93,7 @@ func Sign(c *gin.Context) {
 		})
 		return
 	}
+
 	if signInfo.ID == 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeAuthyLimited,
@@ -101,31 +102,42 @@ func Sign(c *gin.Context) {
 		})
 		return
 	} else {
-		switch signInfo.Status {
-		case 0:
-			c.JSON(http.StatusOK, gin.H{
-				"code":    global.CodeAuthyLimited,
-				"message": "未达到签到资格",
-				"data":    nil,
-			})
-		case 1:
-			updateSignInfo := tables.Play_2399_Sign_List{
-				Status: 2,
-				Date:   time.Now().UnixMilli(),
-				Awards: []string{SIGN_STABLE_AWARD, SIGN_RANDOM_AWARDS[utils.RandInt(len(SIGN_RANDOM_AWARDS))]},
-			}
-			result = db.Model(&tables.Play_2399_Sign_List{}).Where("userId = ? AND createDate BETWEEN ? AND ?", uid, s, e).Updates(updateSignInfo)
-			c.JSON(http.StatusOK, gin.H{
-				"code":    global.CodeOK,
-				"message": "success",
-				"data":    true,
-			})
-		case 2:
+		if signInfo.Status == 2 {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeRunAgain,
 				"message": "今日已签到",
 				"data":    nil,
 			})
+			return
 		}
+
+		var dayChargeTotal DayChargeTotal
+		db.Model(&tables.ChargeInfo{}).Select("sum(count) as total").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Find(&dayChargeTotal)
+		status := 0
+		if dayChargeTotal.Total >= int64(DAY_CHARGE_LIMIT*1000) {
+			status = 1
+		}
+
+		if status == 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeAuthyLimited,
+				"message": "未达到签到资格",
+				"data":    nil,
+			})
+			return
+		}
+
+		awards := []string{SIGN_STABLE_AWARD, SIGN_RANDOM_AWARDS[utils.RandInt(len(SIGN_RANDOM_AWARDS))]}
+		updateSignInfo := tables.Play_2399_Sign_List{
+			Status: 2,
+			Date:   time.Now().UnixMilli(),
+			Awards: awards,
+		}
+		result = db.Model(&tables.Play_2399_Sign_List{}).Where("userId = ? AND createDate BETWEEN ? AND ?", uid, s, e).Updates(updateSignInfo)
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeOK,
+			"message": "success",
+			"data":    awards,
+		})
 	}
 }
