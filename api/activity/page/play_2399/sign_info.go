@@ -1,6 +1,7 @@
 package play_2399
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
@@ -74,15 +75,8 @@ func SignInfo(c *gin.Context) {
 	}
 	if signInfo.ID == 0 { // 没查到记录
 		var dayChargeTotal DayChargeTotal
-		result := db.Model(&tables.ChargeInfo{}).Select("sum(money)").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Scan(&dayChargeTotal)
-		if result.Error != nil {
-			c.JSON(http.StatusOK, gin.H{
-				"code":    global.CodeQueryFailed,
-				"message": "查询失败",
-				"data":    nil,
-			})
-			return
-		}
+		db.Model(&tables.ChargeInfo{}).Select("sum(count)").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Scan(&dayChargeTotal)
+		fmt.Printf("充值总额：%v\n", dayChargeTotal.Total)
 		status := 0
 		if dayChargeTotal.Total >= int64(DAY_CHARGE_LIMIT*1000) {
 			status = 1
@@ -91,8 +85,8 @@ func SignInfo(c *gin.Context) {
 			UserId: uid,
 			Status: status,
 		}
-		result = db.Clauses(clause.OnConflict{DoNothing: true}).Create(&newSignInfo)
-		if result.Error != nil {
+		db.Clauses(clause.OnConflict{DoNothing: true}).Create(&newSignInfo)
+		if db.Error != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeCreateDataFailed,
 				"message": "创建失败",
