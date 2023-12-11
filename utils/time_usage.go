@@ -21,14 +21,31 @@ func NowMilli() int64 {
 	return time.Now().UnixMilli()
 }
 
-/* 计算出某一天的开始时间戳和结束时间戳(毫秒级) */
+/* 计算出本地时间某一天的开始时间戳和结束时间戳(毫秒级) */
 func DayMilli(t time.Time) (int64, int64) {
-	dayStr := t.Format("2006-01-02")
+	loc, err := time.LoadLocation(global.SERVER_TIME_ZONE)
+	if err != nil {
+		return 0, 0
+	}
+	dayStr := t.Format(global.DAY_TIME_FORMAT)
 	dayStartStr := fmt.Sprintf("%s 00:00:00", dayStr)
 
-	ti, err := time.Parse(global.COMMON_TIME_FORMAT, dayStartStr)
+	ti, err := time.ParseInLocation(global.COMMON_TIME_FORMAT, dayStartStr, loc)
 	if err != nil {
 		return 0, 0
 	}
 	return ti.UnixMilli(), ti.Add(time.Hour * 24).UnixMilli()
+}
+
+/* 将时间字符串转换成本地时间戳 */
+func LocMilli(timeStr string) int64 {
+	loc, err := time.LoadLocation(global.SERVER_TIME_ZONE)
+	if err != nil {
+		return 0
+	}
+	ti, err := time.ParseInLocation(global.COMMON_TIME_FORMAT, timeStr, loc)
+	if err != nil {
+		return 0
+	}
+	return ti.UnixMilli()
 }
