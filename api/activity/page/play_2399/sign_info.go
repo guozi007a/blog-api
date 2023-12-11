@@ -1,7 +1,6 @@
 package play_2399
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -73,14 +72,15 @@ func SignInfo(c *gin.Context) {
 		})
 		return
 	}
+
+	var dayChargeTotal DayChargeTotal
+	db.Model(&tables.ChargeInfo{}).Select("sum(count) as total").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Find(&dayChargeTotal)
+	status := 0
+	if dayChargeTotal.Total >= int64(DAY_CHARGE_LIMIT*1000) {
+		status = 1
+	}
+
 	if signInfo.ID == 0 { // 没查到记录
-		var dayChargeTotal DayChargeTotal
-		db.Model(&tables.ChargeInfo{}).Select("sum(count)").Where("userId = ? AND date BETWEEN ? AND ?", uid, s, e).Scan(&dayChargeTotal)
-		fmt.Printf("充值总额：%v\n", dayChargeTotal.Total)
-		status := 0
-		if dayChargeTotal.Total >= int64(DAY_CHARGE_LIMIT*1000) {
-			status = 1
-		}
 		newSignInfo := tables.Play_2399_Sign_List{ // 先初始化记录，再创建
 			UserId: uid,
 			Status: status,
@@ -100,11 +100,19 @@ func SignInfo(c *gin.Context) {
 			"data":    status,
 		})
 		return
+	} else { // 查到记录
+		if signInfo.Status == 0 {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeOK,
+				"message": "",
+				"data":    status,
+			})
+		} else {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeOK,
+				"message": "",
+				"data":    signInfo.Status,
+			})
+		}
 	}
-
-	c.JSON(http.StatusOK, gin.H{
-		"code":    global.CodeOK,
-		"message": "",
-		"data":    signInfo.Status,
-	})
 }
