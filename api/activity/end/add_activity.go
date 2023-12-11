@@ -2,7 +2,7 @@ package end
 
 import (
 	"net/http"
-	"time"
+	"strconv"
 
 	"blog-api/db_server/tables"
 	"blog-api/global"
@@ -31,7 +31,7 @@ func AddActivity(c *gin.Context) {
 		return
 	}
 
-	dst, err := time.Parse(global.COMMON_TIME_FORMAT, dateStart)
+	dst, err := strconv.Atoi(dateStart)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,
@@ -40,7 +40,8 @@ func AddActivity(c *gin.Context) {
 		})
 		return
 	}
-	det, err := time.Parse(global.COMMON_TIME_FORMAT, dateEnd)
+
+	det, err := strconv.Atoi(dateEnd)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeFormatError,
@@ -49,9 +50,9 @@ func AddActivity(c *gin.Context) {
 		})
 		return
 	}
-	var mst time.Time
+	var mst int64 = 0
 	if moudleStart != "" {
-		_mst, err := time.Parse(global.COMMON_TIME_FORMAT, moudleStart)
+		_mst, err := strconv.Atoi(moudleStart)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeFormatError,
@@ -60,11 +61,11 @@ func AddActivity(c *gin.Context) {
 			})
 			return
 		}
-		mst = _mst
+		mst = int64(_mst)
 	}
-	var met time.Time
-	if moudleEnd != "" {
-		_met, err := time.Parse(global.COMMON_TIME_FORMAT, moudleEnd)
+	var met int64 = 0
+	if moudleStart != "" {
+		_met, err := strconv.Atoi(moudleEnd)
 		if err != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeFormatError,
@@ -73,17 +74,17 @@ func AddActivity(c *gin.Context) {
 			})
 			return
 		}
-		met = _met
+		met = int64(_met)
 	}
 	info := tables.ActivityListInfo{
 		Branch:      branch,
 		Name:        name,
 		Tag:         tag,
 		Url:         url,
-		DateStart:   dst.UnixMilli(),
-		DateEnd:     det.UnixMilli(),
-		MoudleStart: mst.UnixMilli(),
-		MoudleEnd:   met.UnixMilli(),
+		DateStart:   int64(dst),
+		DateEnd:     int64(det),
+		MoudleStart: mst,
+		MoudleEnd:   met,
 	}
 	result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&info)
 	if result.Error != nil {

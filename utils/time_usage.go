@@ -32,21 +32,3 @@ func DayMilli(t time.Time) (int64, int64) {
 	}
 	return ti.UnixMilli(), ti.Add(time.Hour * 24).UnixMilli()
 }
-
-/*
-根据给定的时间字符串，返回以北京时间为基准的UTC毫秒时间戳
-该方法主要用于以北京时间进行固定的时间记录，比如活动开始时间，活动结束时间
-*/
-func CN_Milli(dateStr string) int64 {
-	local, err := time.LoadLocation("Asia/Shanghai") // 加载中国东八区的时区
-	if err != nil {
-		return 0
-	}
-
-	ds, err := time.ParseInLocation(global.COMMON_TIME_FORMAT, dateStr, local) // 使用东八区的时区来解析时间字符串
-	if err != nil {
-		return 0
-	}
-
-	return ds.UTC().UnixMilli() // 输出对应于UTC的Unix毫秒时间戳
-}
