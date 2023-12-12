@@ -24,6 +24,11 @@ type CardPrizeInfo struct {
 	PrizeName string `json:"prizeName"`
 }
 
+type ResultInfo struct { // 最终返回给前端的结构
+	Count int64           `json:"count"`
+	List  []CardPrizeInfo `json:"list"`
+}
+
 func CardInfo(c *gin.Context) {
 	db := global.GlobalDB
 
@@ -90,6 +95,7 @@ func CardInfo(c *gin.Context) {
 		})
 		return
 	}
+
 	var turnCardsInfo tables.Play_2399_Turn_Cards
 	result = db.Model(&tables.Play_2399_Turn_Cards{}).Where("userId = ?", uid).Preload("Cards").Find(&turnCardsInfo)
 	if result.Error != nil {
@@ -155,13 +161,23 @@ func CardInfo(c *gin.Context) {
 			return
 		}
 
+		// 处理一下结果，将userId字段摘出来，不返回给前端
+		cards := turnCardsInfo.Cards
+		var s []CardPrizeInfo
+		for _, v := range cards {
+			s = append(s, CardPrizeInfo{
+				Position:  v.Position,
+				PrizeId:   v.PrizeId,
+				PrizeName: v.PrizeName,
+			})
+		}
+
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeOK,
 			"message": "success",
-			"data": tables.Play_2399_Turn_Cards{
+			"data": ResultInfo{
 				Count: roundTotal.Total / 1000,
-				Round: turnCardsInfo.Round,
-				Cards: turnCardsInfo.Cards,
+				List:  s,
 			},
 		})
 	}
