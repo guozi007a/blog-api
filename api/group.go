@@ -59,5 +59,6 @@ func groupRouter(r *gin.Engine) {
 		activity.POST("/2399/sign", play_2399.Sign)
 		activity.GET("/2399/signInfo", play_2399.SignInfo)
 		activity.GET("/2399/cardInfo", play_2399.CardInfo)
+		activity.POST("/2399/turnCard", play_2399.TurnCard)
 	}
 }

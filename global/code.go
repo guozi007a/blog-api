@@ -32,4 +32,5 @@ var (
 	CodeTokenInvalid        = "27" // token失效
 	CodeNoActivityInfo      = "28" // 没有活动信息
 	CodeActivityInfoError   = "29" // 活动信息错误
+	CodeChargeNotEnough     = "30" // 充值金额不足
 )
