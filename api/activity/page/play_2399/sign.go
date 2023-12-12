@@ -15,8 +15,8 @@ import (
 )
 
 type ActivityInfo struct {
-	DateStart int64 `json:"dateStart"`
-	DateEnd   int64 `json:"dateEnd"`
+	DateStart int64 `json:"dateStart" gorm:"column:dateStart"`
+	DateEnd   int64 `json:"dateEnd" gorm:"column:dateEnd"`
 }
 
 func Sign(c *gin.Context) {
@@ -46,7 +46,7 @@ func Sign(c *gin.Context) {
 
 	// 验证是否在活动时间内
 	var activityInfo ActivityInfo
-	result := db.Where("branch = ?", ACTIVITY_BRANCH).Find(&activityInfo)
+	result := db.Model(&tables.ActivityListInfo{}).Where("branch = ?", ACTIVITY_BRANCH).Find(&activityInfo)
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeQueryFailed,
