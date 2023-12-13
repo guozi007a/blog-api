@@ -1,7 +1,6 @@
 package play_2399
 
 import (
-	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
@@ -215,9 +214,7 @@ func TurnCard(c *gin.Context) {
 			db.Model(&tables.Play_2399_Card_Prize{}).Where("userId = ?", uid).Updates(map[string]interface{}{"prizeId": 0, "prizeName": ""})
 
 			// 中奖
-			fmt.Printf("position: %v\n", pos.Position)
 			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(3)]
-			fmt.Printf("award: %+v\n", award)
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeOK,
 				"message": "success",
