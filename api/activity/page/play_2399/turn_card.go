@@ -1,6 +1,7 @@
 package play_2399
 
 import (
+	"fmt"
 	"net/http"
 	"slices"
 	"strconv"
@@ -158,7 +159,7 @@ func TurnCard(c *gin.Context) {
 			db.Model(&tables.Play_2399_Card_Prize{}).Where("userId = ?", uid).Updates(map[string]interface{}{"prizeId": 0, "prizeName": ""})
 
 			// 中奖
-			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(4)]
+			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(3)]
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeOK,
 				"message": "success",
@@ -171,7 +172,7 @@ func TurnCard(c *gin.Context) {
 			return
 		} else { // 不是最后一张卡片
 			// 更新对应位置卡片的奖励
-			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(4)]
+			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(3)]
 			db.Model(&tables.Play_2399_Card_Prize{}).Where("userId = ? AND position = ?", uid, pos.Position).Updates(tables.Play_2399_Card_Prize{PrizeId: award.PrizeId, PrizeName: award.PrizeName})
 			// 中奖
 			c.JSON(http.StatusOK, gin.H{
@@ -214,7 +215,9 @@ func TurnCard(c *gin.Context) {
 			db.Model(&tables.Play_2399_Card_Prize{}).Where("userId = ?", uid).Updates(map[string]interface{}{"prizeId": 0, "prizeName": ""})
 
 			// 中奖
-			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(4)]
+			fmt.Printf("position: %v\n", pos.Position)
+			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(3)]
+			fmt.Printf("award: %+v\n", award)
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeOK,
 				"message": "success",
@@ -227,7 +230,7 @@ func TurnCard(c *gin.Context) {
 			return
 		} else { // 不是最后一张卡片
 			// 更新对应位置卡片的奖励
-			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(4)]
+			award := CARDS_AWARDS[pos.Position-1][utils.RandInt(3)]
 			db.Model(&tables.Play_2399_Card_Prize{}).Where("userId = ? AND position = ?", uid, pos.Position).Updates(tables.Play_2399_Card_Prize{PrizeId: award.PrizeId, PrizeName: award.PrizeName})
 			// 中奖
 			c.JSON(http.StatusOK, gin.H{

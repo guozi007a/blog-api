@@ -80,7 +80,7 @@ func Charge(c *gin.Context) {
 	// 根据充值类型，更新用户信息中的秀币/欢乐券数量
 	switch chargeUser.Type {
 	case "money":
-		result := db.Model(&tables.IdInfo{}).Where("userId = ?", chargeUser.UserId).Update("money", gorm.Expr("money + ?", chargeUser.Count))
+		result := db.Model(&tables.IdInfo{}).Where("userId = ?", chargeUser.UserId).Update("money", gorm.Expr("money + ?", chargeUser.Count*1000))
 		if result.Error != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeUpdateFailed,
@@ -90,7 +90,7 @@ func Charge(c *gin.Context) {
 			return
 		}
 	case "coupon":
-		result := db.Model(&tables.IdInfo{}).Where("userId = ?", chargeUser.UserId).Update("coupon", gorm.Expr("coupon + ?", chargeUser.Count))
+		result := db.Model(&tables.IdInfo{}).Where("userId = ?", chargeUser.UserId).Update("coupon", gorm.Expr("coupon + ?", chargeUser.Count*1000))
 		if result.Error != nil {
 			c.JSON(http.StatusOK, gin.H{
 				"code":    global.CodeUpdateFailed,
