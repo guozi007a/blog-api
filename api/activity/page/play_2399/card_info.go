@@ -1,7 +1,6 @@
 package play_2399
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -106,7 +105,7 @@ func CardInfo(c *gin.Context) {
 		})
 		return
 	}
-	fmt.Printf("turn cards info: %+v\n", turnCardsInfo)
+	// fmt.Printf("turn cards info: %+v\n", turnCardsInfo)
 	if turnCardsInfo.UserId == 0 {
 		// 活动开始到现在的充值金额
 		var roundTotal RoundTotal
