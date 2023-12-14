@@ -33,6 +33,7 @@ func InitMySQL() {
 		&tables.Play_2399_Sign_List{},
 		&tables.Play_2399_Turn_Cards{},
 		&tables.Play_2399_Card_Prize{},
+		&tables.KKGifts{},
 	)
 
 	global.GlobalDB = mysqlDB
