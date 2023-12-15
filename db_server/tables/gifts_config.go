@@ -27,10 +27,3 @@ GiftTag GiftTagID 一个礼物可以有多个不同的tag
 等级礼物 6 表示达到指定等级才可以赠送的礼物
 粉丝礼物 7 表示关注了本房间房主的用户才可以赠送的礼物
 */
-
-var InsertGifts = []KKGifts{
-	{
-		GiftID:   80,
-		GiftName: "VIP",
-	},
-}
