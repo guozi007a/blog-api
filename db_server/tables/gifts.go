@@ -25,6 +25,12 @@ type KKGifts struct {
 	GiftDescribe string         `json:"giftDescribe" gorm:"comment:礼物描述;column:giftDescribe"`
 }
 
+func (GiftTags) TableName() string {
+	return "gift_tags"
+}
+func (ExtendsTypes) TableName() string {
+	return "extends_types"
+}
 func (KKGifts) TableName() string {
 	return "kk_gifts"
 }
