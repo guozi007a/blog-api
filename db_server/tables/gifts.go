@@ -1,14 +1,15 @@
 package tables
 
 type GiftTags struct {
-	GiftID    int    `json:"giftId" gorm:"index;comment:礼物ID;column:giftId"`
-	GiftTag   string `json:"giftTag" gorm:"comment:礼物标签，如活动礼物，年度礼物，战神礼物等;column:giftTag"`
-	GiftTagID int    `json:"giftTagId" gorm:"comment:不同标签礼物对应的ID;column:giftTagId;primaryKey"`
+	GiftID      int    `json:"giftId" gorm:"index;comment:礼物ID;column:giftId"`
+	GiftTagName string `json:"giftTagName" gorm:"comment:礼物标签，如活动礼物，年度礼物，战神礼物等;column:giftTagName"`
+	GiftTagID   int    `json:"giftTagId" gorm:"comment:不同标签礼物对应的ID;column:giftTagId;primaryKey"`
 }
 
 type ExtendsTypes struct {
-	GiftID    int `json:"giftId" gorm:"index;comment:礼物ID;column:giftId"`
-	ExtendsID int `json:"extendsId" gorm:"comment:拓展ID;column:extendsId;primaryKey"`
+	GiftID      int    `json:"giftId" gorm:"index;comment:礼物ID;column:giftId"`
+	ExtendsID   int    `json:"extendsId" gorm:"comment:拓展ID;column:extendsId;primaryKey"`
+	ExtendsName string `json:"extendsName" gorm:"comment:拓展分类名称;column:extendsName"`
 }
 
 type KKGifts struct {
