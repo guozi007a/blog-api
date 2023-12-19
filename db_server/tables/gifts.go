@@ -22,7 +22,6 @@ type KKGifts struct {
 	GiftValue    int            `json:"giftValue" gorm:"comment:礼物价格(秀币);column:giftValue"`
 	CreateDate   int64          `json:"createDate" gorm:"comment:创建该记录的时间戳;autoCreateTime:milli;column:createDate"`
 	UpdateDate   int64          `json:"updateDate" gorm:"comment:更新记录的时间戳;autoUpdateTime:milli;column:updateDate"`
-	RoomID       int            `json:"roomId" gorm:"comment:有些礼物可能只在指定的房间展示，所以会带有房间ID;column:roomId;default:0"`
 	GiftDescribe string         `json:"giftDescribe" gorm:"comment:礼物描述;column:giftDescribe"`
 }
 
