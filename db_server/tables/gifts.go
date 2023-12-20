@@ -19,7 +19,7 @@ type KKGifts struct {
 	GiftTypeID     int            `json:"giftTypeId" gorm:"comment:不同类别的礼物对应的不同ID;column:giftTypeId"`
 	ExtendsTypes   []ExtendsTypes `json:"extendsTypes" gorm:"comment:类型扩展;column:extendsTypes;foreignKey:GiftID;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
 	GiftTags       []GiftTags     `json:"giftTags" gorm:"foreignKey:GiftID;column:giftTags;constraint:OnUpdate:CASCADE,OnDelete:SET NULL"`
-	GiftValue      int            `json:"giftValue" gorm:"comment:礼物价格(秀币);column:giftValue"`
+	GiftValue      int64          `json:"giftValue" gorm:"comment:礼物价格(秀币);column:giftValue"`
 	CreateDate     int64          `json:"createDate" gorm:"comment:创建该记录的时间戳;autoCreateTime:milli;column:createDate"`
 	UpdateDate     int64          `json:"updateDate" gorm:"comment:更新记录的时间戳;autoUpdateTime:milli;column:updateDate"`
 	GiftDescribe   string         `json:"giftDescribe" gorm:"comment:礼物描述;column:giftDescribe"`
