@@ -23,7 +23,7 @@ type AddGiftsParamsConfig struct {
 	CornerMarkName string                `json:"cornerMarkName" form:"cornerMarkName"`
 }
 
-func AddGifts(c *gin.Context) {
+func AddGift(c *gin.Context) {
 	db := global.GlobalDB
 
 	var params AddGiftsParamsConfig

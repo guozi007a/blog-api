@@ -45,6 +45,8 @@ func groupRouter(r *gin.Engine) {
 		v2.POST("/charge", end.Charge)
 		v2.GET("/chargeList", end.GetChargeList)
 		v2.POST("/chargeDel", end.ChargeDel)
+		v2.GET("/searchGifts", end.SearchGifts)
+		v2.POST("/addGift", end.AddGift)
 	}
 
 	v3 := r.Group("/v3")
