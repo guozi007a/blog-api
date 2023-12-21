@@ -11,16 +11,16 @@ import (
 )
 
 type AddGiftsParamsConfig struct {
-	GiftID         int                   `json:"giftId" form:"giftId"`
-	GiftName       string                `json:"giftName" form:"giftName"`
-	GiftType       string                `json:"giftType" form:"giftType"`
-	GiftTypeID     int                   `json:"giftTypeId" form:"giftTypeId"`
-	ExtendsTypes   []tables.ExtendsTypes `json:"extendsTypes" form:"extendsTypes"`
-	GiftTags       []tables.GiftTags     `json:"giftTags" form:"giftTags"`
-	GiftValue      int64                 `json:"giftValue" form:"giftValue"`
-	GiftDescribe   string                `json:"giftDescribe" form:"giftDescribe"`
-	CornerMarkID   int                   `json:"cornerMarkId" form:"cornerMarkId"`
-	CornerMarkName string                `json:"cornerMarkName" form:"cornerMarkName"`
+	GiftID         int                  `json:"giftId" form:"giftId"`
+	GiftName       string               `json:"giftName" form:"giftName"`
+	GiftType       string               `json:"giftType" form:"giftType"`
+	GiftTypeID     int                  `json:"giftTypeId" form:"giftTypeId"`
+	ExtendsTypes   []tables.ExtendsType `json:"extendsTypes" form:"extendsTypes"`
+	GiftTags       []tables.GiftTag     `json:"giftTags" form:"giftTags"`
+	GiftValue      int64                `json:"giftValue" form:"giftValue"`
+	GiftDescribe   string               `json:"giftDescribe" form:"giftDescribe"`
+	CornerMarkID   int                  `json:"cornerMarkId" form:"cornerMarkId"`
+	CornerMarkName string               `json:"cornerMarkName" form:"cornerMarkName"`
 }
 
 func AddGift(c *gin.Context) {
