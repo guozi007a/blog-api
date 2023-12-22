@@ -27,7 +27,15 @@ func DelGifts(c *gin.Context) {
 		return
 	}
 
-	db.Unscoped().Delete(&tables.KKGifts{}, "giftId IN ?", params.IDs)
+	result := db.Unscoped().Delete(&tables.KKGifts{}, "giftId IN ?", params.IDs)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeDeleteFailed,
+			"message": "删除失败",
+			"data":    nil,
+		})
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{
 		"code":    global.CodeOK,

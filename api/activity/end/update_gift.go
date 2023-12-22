@@ -10,20 +10,7 @@ import (
 	"gorm.io/gorm/clause"
 )
 
-type AddGiftsParamsConfig struct {
-	GiftID         int                  `json:"giftId" form:"giftId"`
-	GiftName       string               `json:"giftName" form:"giftName"`
-	GiftType       string               `json:"giftType" form:"giftType"`
-	GiftTypeID     int                  `json:"giftTypeId" form:"giftTypeId"`
-	ExtendsTypes   []tables.ExtendsType `json:"extendsTypes" form:"extendsTypes"`
-	GiftTags       []tables.GiftTag     `json:"giftTags" form:"giftTags"`
-	GiftValue      int64                `json:"giftValue" form:"giftValue"`
-	GiftDescribe   string               `json:"giftDescribe" form:"giftDescribe"`
-	CornerMarkID   int                  `json:"cornerMarkId" form:"cornerMarkId"`
-	CornerMarkName string               `json:"cornerMarkName" form:"cornerMarkName"`
-}
-
-func AddGift(c *gin.Context) {
+func UpdateGift(c *gin.Context) {
 	db := global.GlobalDB
 
 	var params AddGiftsParamsConfig
@@ -44,6 +31,17 @@ func AddGift(c *gin.Context) {
 		})
 		return
 	}
+
+	result := db.Unscoped().Delete(&tables.KKGifts{}, params.GiftID)
+	if result.Error != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeDeleteFailed,
+			"message": "删除失败",
+			"data":    nil,
+		})
+		return
+	}
+
 	gift := tables.KKGifts{
 		GiftID:         params.GiftID,
 		GiftName:       params.GiftName,
