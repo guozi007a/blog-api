@@ -425,10 +425,7 @@ func SearchGifts(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeQueryFailed,
 			"message": "暂不支持同时3种及以上的查询条件！",
-			"data": SearchGiftsRes{
-				GiftList: gifts,
-				Total:    count,
-			},
+			"data":    nil,
 		})
 		return
 	}
