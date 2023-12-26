@@ -4,6 +4,7 @@ import (
 	"blog-api/db_server/tables"
 	"blog-api/global"
 	"fmt"
+	"math"
 	"time"
 
 	"net/http"
@@ -14,6 +15,38 @@ import (
 
 type ExposeGiftParams struct {
 	IDs []int `form:"ids"`
+}
+
+// 将ExtendsTypes转换为字符串拼接形式
+func extends2Str(s []tables.ExtendsType) string {
+	if len(s) == 0 {
+		return ""
+	}
+	str := ""
+	for i, v := range s {
+		if i == 0 {
+			str = v.ExtendsName
+		} else {
+			str += fmt.Sprintf("、%s", v.ExtendsName)
+		}
+	}
+	return str
+}
+
+// 同理，将礼物标签也转换为字符串拼接形式
+func tags2Str(s []tables.GiftTag) string {
+	if len(s) == 0 {
+		return ""
+	}
+	str := ""
+	for i, v := range s {
+		if i == 0 {
+			str = v.GiftTagName
+		} else {
+			str += fmt.Sprintf("、%s", v.GiftTagName)
+		}
+	}
+	return str
 }
 
 func DownLoadGiftExcel(c *gin.Context) {
@@ -123,13 +156,25 @@ func DownLoadGiftExcel(c *gin.Context) {
 		return
 	}
 	// 添加数据
-	// colLines := []string{"A", "B", "C", "D", "E", "F", "G", "H"}
-	// for i, v := range gifts {
-	// 	for k, val := range gifts[i] {
-	// 		err := f.SetCellValue("Sheet1", fmt.Sprintf("%s%v", colLines[k], k+1), val.giftId)
-	// 	}
-	// }
-	// 通过cell给整个Sheet设置居中和字号
+	for i, v := range gifts {
+		err := f.SetCellInt("Sheet1", fmt.Sprintf("A%v", i+2), v.GiftID)
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("B%v", i+2), v.GiftName)
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("C%v", i+2), v.GiftType)
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("D%v", i+2), extends2Str(v.ExtendsTypes))
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("E%v", i+2), tags2Str(v.GiftTags))
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("F%v", i+2), v.GiftValue)
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("G%v", i+2), v.CornerMarkName)
+		err = f.SetCellValue("Sheet1", fmt.Sprintf("H%v", i+2), time.UnixMilli(v.CreateDate).Format("2006-01-02 15:04:05"))
+		if err != nil {
+			c.JSON(http.StatusOK, gin.H{
+				"code":    global.CodeCreateFileError,
+				"message": "设置有误",
+				"data":    nil,
+			})
+			return
+		}
+	}
+	// 给其他行设置样式
 	sheetStyleID, err := f.NewStyle(&excelize.Style{
 		Alignment: &excelize.Alignment{ // 对齐方式
 			Horizontal: "center",
@@ -137,8 +182,8 @@ func DownLoadGiftExcel(c *gin.Context) {
 			WrapText:   true,
 		},
 		Font: &excelize.Font{ // 字体
-			Bold: true,
-			Size: 14,
+			Bold: false,
+			Size: 12,
 		},
 		Border: []excelize.Border{ // 边框 #D3D3D3是电脑上创建的Excel的边框默认色，这里为了保持一致也设置该色。
 			{Type: "top", Color: "D3D3D3", Style: 1},
@@ -147,13 +192,14 @@ func DownLoadGiftExcel(c *gin.Context) {
 			{Type: "right", Color: "D3D3D3", Style: 1},
 		},
 	})
-	cellRows, _ := f.GetRows("Sheet1")
-	cellCols, _ := f.GetCols("Sheet1")
-	for i := 0; i < len(cellRows); i++ {
-		for j := 0; j < len(cellCols); j++ {
-			cellName, _ := excelize.CoordinatesToCellName(j+1, i+1)    // 获取单元格名称
-			f.SetCellStyle("Sheet1", cellName, cellName, sheetStyleID) // 应用样式到单元格
-		}
+	err = f.SetRowStyle("Sheet1", 2, int(math.Max(float64(len(gifts)+1), 2)), sheetStyleID)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code":    global.CodeCreateFileError,
+			"message": "设置有误",
+			"data":    nil,
+		})
+		return
 	}
 
 	// 添加响应头
