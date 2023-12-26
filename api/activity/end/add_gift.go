@@ -1,6 +1,7 @@
 package end
 
 import (
+	"fmt"
 	"net/http"
 
 	"blog-api/db_server/tables"
@@ -56,6 +57,8 @@ func AddGift(c *gin.Context) {
 		CornerMarkID:   params.CornerMarkID,
 		CornerMarkName: params.CornerMarkName,
 	}
+
+	fmt.Printf("gift: %+v\n", gift)
 
 	db.Clauses(clause.OnConflict{DoNothing: true}).Create(&gift)
 

@@ -1,7 +1,7 @@
 package tables
 
 type ActivityListInfo struct {
-	ID          int    `json:"id" gorm:"comment:活动编号;not null;unique;column:id;autoIncrement"`
+	ID          int    `json:"id" gorm:"comment:活动编号;column:id;autoIncrement"`
 	Branch      string `json:"branch" gorm:"comment:活动分支,例play_2399;primaryKey"`
 	Name        string `json:"name" gorm:"comment:活动名称,例感恩节活动"`
 	Tag         string `json:"tag" gorm:"comment:活动类型,例如节日活动"`

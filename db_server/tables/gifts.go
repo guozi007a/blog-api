@@ -1,9 +1,10 @@
 package tables
 
 type GiftTag struct {
+	ID          int    `json:"id" gorm:"column:id;primaryKey"`
 	GiftID      int    `json:"giftId" gorm:"index;comment:礼物ID;column:giftId"`
 	GiftTagName string `json:"giftTagName" gorm:"comment:礼物标签，如活动礼物/年度礼物/战神礼物等;column:giftTagName"`
-	GiftTagID   int    `json:"giftTagId" gorm:"comment:不同标签礼物对应的ID;column:giftTagId;primaryKey"`
+	GiftTagID   int    `json:"giftTagId" gorm:"comment:不同标签礼物对应的ID;column:giftTagId;index"`
 }
 
 func (GiftTag) TableName() string {
@@ -11,8 +12,9 @@ func (GiftTag) TableName() string {
 }
 
 type ExtendsType struct {
+	ID          int    `json:"id" gorm:"column:id;primaryKey"`
 	GiftID      int    `json:"giftId" gorm:"index;comment:礼物ID;column:giftId"`
-	ExtendsID   int    `json:"extendsId" gorm:"comment:拓展ID;column:extendsId;primaryKey"`
+	ExtendsID   int    `json:"extendsId" gorm:"comment:拓展ID;column:extendsId;index"`
 	ExtendsName string `json:"extendsName" gorm:"comment:拓展分类名称;column:extendsName"`
 }
 
