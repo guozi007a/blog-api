@@ -204,7 +204,7 @@ func DownLoadGiftExcel(c *gin.Context) {
 
 	// 添加响应头
 	c.Header("Content-Type", "application/octet-stream")
-	// c.Header("Content-Disposition", `attachment; filename="Book1.xlsx"`)
+	// 设置"Content-Disposition"是为了让浏览器去下载该文件，而不是只响应不下载
 	c.Header("Content-Disposition", fmt.Sprintf(`attachment; filename="gifts_%v.xlsx"`, time.Now().UnixMilli()))
 	// 浏览器会将header里的敏感数据都隐藏起来，前端就无法通过header获取后端定义的文件名，所以这里要暴露给浏览器
 	c.Header("Access-Control-Expose-Headers", "Content-Type, Content-Disposition")
