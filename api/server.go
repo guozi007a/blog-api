@@ -18,7 +18,7 @@ func Server() {
 		AllowMethods:     []string{"GET", "POST", "OPTIONS", "PUT", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Length", "Content-Type", "Cookie", "ACTIVITY_SESSION_ID", "USERID", "TOKEN"}, // 大小写不敏感
 		AllowCredentials: true,
-		AllowOrigins:     []string{"http://localhost:3001", "http://121.40.42.63"},
+		AllowOrigins:     []string{"http://localhost:3001", "http://121.40.42.63", "https://multi-app-blog.fun:9000"},
 		MaxAge:           24 * time.Hour, // 表示在24小时内，同样的预检请求可以不再重复进行了
 	}))
 	r.Use(plugins.VerifyTokenMiddleware())
