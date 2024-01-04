@@ -3,7 +3,6 @@ package page
 import (
 	"blog-api/db_server/tables"
 	"blog-api/utils"
-	"log"
 	"net/http"
 
 	"blog-api/global"
@@ -59,16 +58,14 @@ func GetProfileInfo(c *gin.Context) {
 	result := db.Table(idInfo.TableName()).Where("userId = ?", uid).Find(&profile)
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{})
-		panic(result.Error)
+		return
 	}
 	if profile.UserId == 0 {
 		c.JSON(http.StatusOK, gin.H{})
-		log.Fatalln("未查询到指定用户信息")
 		return
 	}
 	if profile.Token == "" {
 		c.JSON(http.StatusOK, gin.H{})
-		log.Fatalln("token无效")
 		return
 	}
 	claims := plugins.ParseToken(profile.Token)
