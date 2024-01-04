@@ -17,7 +17,7 @@ func DownLoadGiftsJSON(c *gin.Context) {
 	db := global.GlobalDB
 
 	var gifts []tables.KKGifts
-	result := db.Model(&tables.KKGifts{}).Find(&gifts)
+	result := db.Preload("ExtendsTypes").Preload("GiftTags").Find(&gifts)
 	if result.Error != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code":    global.CodeQueryFailed,
